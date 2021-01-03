@@ -1,0 +1,12 @@
+version: '3.0'
+services:
+  local-arcus-cloud:
+    user: arcus
+    image: devookim/arcus-memcached:SNAPSHOT3
+    ports:
+      - "12181:2181"
+      - "11211:11211"
+      - "11212:11211"
+    command: "/home/arcus/start_arcus_cloud.sh"
+
+
