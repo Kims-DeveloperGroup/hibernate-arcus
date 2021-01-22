@@ -43,7 +43,7 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
         fallback = true;
 
         StrategySelector selector = settings.getServiceRegistry().getService(StrategySelector.class);
-        cacheKeysFactory = selector.resolveDefaultableStrategy(CacheKeysFactory.class, 
+        cacheKeysFactory = selector.resolveDefaultableStrategy(CacheKeysFactory.class,
                 properties.get(Environment.CACHE_KEYS_FACTORY), new HibernateArcusCacheKeysFactory());
     }
 
@@ -95,24 +95,25 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
 
     @Override
     protected DomainDataStorageAccess createDomainDataStorageAccess(DomainDataRegionConfig regionConfig, DomainDataRegionBuildingContext buildingContext) {
-        ArcusClientPool cacheClientPool = getCache(qualifyName(regionConfig.getRegionName()));
-        return new HibernateArcusStorageAccess(cacheClientPool, regionConfig.getRegionName());
+        ArcusClientPool cacheClientPool = getCache(qualify(regionConfig.getRegionName()));
+        return new HibernateArcusStorageAccess(cacheClientPool,  qualify(regionConfig.getRegionName()));
     }
 
-    private String qualifyName(String name) {
-        return RegionNameQualifier.INSTANCE.qualify(name, getOptions());
+    @Override
+    public String qualify(String regionName) {
+        return super.qualify(regionName).replace("#", "_");
     }
 
     @Override
     protected StorageAccess createQueryResultsRegionStorageAccess(String regionName, SessionFactoryImplementor sessionFactory) {
-        ArcusClientPool cacheClientPool = getCache(qualifyName(regionName));
-        return new HibernateArcusStorageAccess(cacheClientPool,regionName);
+        ArcusClientPool cacheClientPool = getCache(qualify(regionName));
+        return new HibernateArcusStorageAccess(cacheClientPool, qualify(regionName));
     }
 
     @Override
     protected StorageAccess createTimestampsRegionStorageAccess(String regionName, SessionFactoryImplementor sessionFactory) {
-        ArcusClientPool cacheClientPool = getCache(qualifyName(regionName));
-        return new HibernateArcusStorageAccess(cacheClientPool, regionName);
+        ArcusClientPool cacheClientPool = getCache(qualify(regionName));
+        return new HibernateArcusStorageAccess(cacheClientPool, qualify(regionName));
     }
 
     protected ArcusClientPool getCache(String regionName) {
