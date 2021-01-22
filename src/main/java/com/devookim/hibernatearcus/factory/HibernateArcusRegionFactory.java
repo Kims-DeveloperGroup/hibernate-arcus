@@ -48,7 +48,7 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
     }
 
     protected HibernateArcusClientFactory createArcus(Map<Object, Object> properties) {
-        return new HibernateArcusClientFactory(new ArcusClientConfig("", "service-code", 1));
+        return new HibernateArcusClientFactory(new ArcusClientConfig("localhost:12181", "test", 1));
     }
 
     @Override
