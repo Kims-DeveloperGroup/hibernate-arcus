@@ -21,7 +21,7 @@ public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
     }
 
     private String generateKey(Object key) {
-        return prefix + ":" + key.hashCode();
+        return (prefix + ":" + key).replace("$", "");
     }
 
     @Override
