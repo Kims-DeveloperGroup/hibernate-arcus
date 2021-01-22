@@ -49,7 +49,7 @@ public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
         String generatedKey = generateKey(key);
         try {
             cacheClientPool.set(generatedKey, 0, value).get();
-            log.debug("cachePut for {}", generatedKey);
+            log.debug("cachePut for {} value: {}", generatedKey, value);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             if (fallback) {
@@ -101,7 +101,7 @@ public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
         }
         String generatedKey = generateKey(key);
         try {
-            log.info("cacheEvict for {}", prefix);
+            log.info("cacheEvict for {}", generatedKey);
             cacheClientPool.delete(generatedKey).get();
         } catch (Exception e) {
             log.error("key: {}", generatedKey, e);
