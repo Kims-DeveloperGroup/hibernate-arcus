@@ -122,16 +122,17 @@ public class DomainDataCacheTest extends BaseCoreFunctionalTestCase {
     }
     
     @Test
-    public void testUpdateAndRefresh_whenUpdateIsRolledBack_thenCacheShouldNotUpdate() {
+    public void testUpdate_whenUpdateIsRolledBack_thenCacheShouldNotUpdate() {
         Statistics stats = sessionFactory().getStatistics();
         Long id = null;
         Session s = openSession();
         s.beginTransaction();
-        DomainData item = new DomainData( "domainData" );
+        String expectedDomainDataNameAfterRollback = "domainData";
+        DomainData item = new DomainData(expectedDomainDataNameAfterRollback);
         id = (Long) s.save( item );
         s.flush();
         s.getTransaction().commit();
-
+        s.close();
         Assert.assertEquals(1, stats.getDomainDataRegionStatistics(DomainData.CACHE_REGION_NAME).getPutCount());
 
         s = openSession();
@@ -140,7 +141,6 @@ public class DomainDataCacheTest extends BaseCoreFunctionalTestCase {
         item.setName("newDomainData");
         s.update(item);
         s.flush();
-        s.refresh(item);
         s.getTransaction().rollback();
         s.clear();
         s.close();
@@ -148,11 +148,48 @@ public class DomainDataCacheTest extends BaseCoreFunctionalTestCase {
         s = openSession();
         s.beginTransaction();
         item = s.get(DomainData.class, id);
-        Assert.assertEquals("domainData", item.getName());
-        s.delete(item);
+        Assert.assertEquals(expectedDomainDataNameAfterRollback, item.getName());
         s.getTransaction().commit();
         s.close();
-        
+
         Assert.assertEquals(1, stats.getDomainDataRegionStatistics(DomainData.CACHE_REGION_NAME).getHitCount());
+    }
+
+    @Test
+    public void testUpdate_whenUpdateIsCommitted_thenCacheShouldBeUpdated() {
+        Statistics stats = sessionFactory().getStatistics();
+        Long id = null;
+        Session s = openSession();
+        s.beginTransaction();
+        DomainData item = new DomainData( "domainData" );
+        id = (Long) s.save( item );
+        s.flush();
+        s.getTransaction().commit();
+        s.close();
+        Assert.assertEquals(0, stats.getDomainDataRegionStatistics(DomainData.CACHE_REGION_NAME).getHitCount());
+        Assert.assertEquals(1, stats.getDomainDataRegionStatistics(DomainData.CACHE_REGION_NAME).getPutCount());
+
+        s = openSession();
+        s.beginTransaction();
+        item = s.get(DomainData.class, id);
+        String updatedDomainDataName = "newDomainData";
+        item.setName(updatedDomainDataName);
+        s.update(item);
+        s.flush();
+        s.getTransaction().commit();
+        s.clear();
+        s.close();
+        Assert.assertEquals(1, stats.getDomainDataRegionStatistics(DomainData.CACHE_REGION_NAME).getHitCount());
+        Assert.assertEquals(2, stats.getDomainDataRegionStatistics(DomainData.CACHE_REGION_NAME).getPutCount());
+
+        s = openSession();
+        s.beginTransaction();
+        DomainData domainDataAfterUpdate = s.get(DomainData.class, id);
+        s.getTransaction().commit();
+        s.close();
+
+        assertThat(domainDataAfterUpdate.getName()).isEqualTo(updatedDomainDataName);
+        Assert.assertEquals(2, stats.getDomainDataRegionStatistics(DomainData.CACHE_REGION_NAME).getHitCount());
+        Assert.assertEquals(2, stats.getDomainDataRegionStatistics(DomainData.CACHE_REGION_NAME).getHitCount());
     }
 }
