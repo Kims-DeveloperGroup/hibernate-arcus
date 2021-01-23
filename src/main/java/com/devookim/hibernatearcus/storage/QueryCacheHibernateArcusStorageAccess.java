@@ -1,4 +1,4 @@
-package com.devookim.hibernatearcus.factory;
+package com.devookim.hibernatearcus.storage;
 
 import net.spy.memcached.ArcusClientPool;
 import org.hibernate.cache.spi.QueryKey;
