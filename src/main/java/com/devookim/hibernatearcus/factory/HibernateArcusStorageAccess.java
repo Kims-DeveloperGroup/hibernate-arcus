@@ -9,19 +9,19 @@ import org.slf4j.Logger;
 public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(HibernateArcusStorageAccess.class);
     private ArcusClientPool cacheClientPool;
-    private String prefix;
+    protected final String CACHE_REGION;
     boolean fallback;
     volatile boolean fallbackMode;
 
     public HibernateArcusStorageAccess(ArcusClientPool arcusClientPool, String prefix) {
         super();
         this.cacheClientPool = arcusClientPool;
-        this.prefix = prefix;
+        this.CACHE_REGION = prefix;
         fallback = false;
     }
 
-    private String generateKey(Object key) {
-        return (prefix + ":" + key).replace("$", "");
+    protected String generateKey(Object key) {
+        return (CACHE_REGION + ":" + key).replace("$", "");
     }
 
     @Override
@@ -49,7 +49,7 @@ public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
         String generatedKey = generateKey(key);
         try {
             cacheClientPool.set(generatedKey, 0, value).get();
-            log.debug("cachePut for {} value: {}", generatedKey, value);
+            log.debug("cachePut for key: {} value: {}", generatedKey, value);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             if (fallback) {
@@ -84,9 +84,9 @@ public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
             return;
         }
         try {
-            log.info("cacheEvict for {}", prefix);
+            log.info("cacheEvict for {}", CACHE_REGION);
         } catch (Exception e) {
-            log.error("key: {}", prefix, e);
+            log.error("key: {}", CACHE_REGION, e);
             if (fallback) {
                 return;
             }
