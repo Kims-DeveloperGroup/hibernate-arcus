@@ -107,7 +107,7 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
     @Override
     protected StorageAccess createQueryResultsRegionStorageAccess(String regionName, SessionFactoryImplementor sessionFactory) {
         ArcusClientPool cacheClientPool = getCache(qualify(regionName));
-        return new HibernateArcusStorageAccess(cacheClientPool, qualify(regionName));
+        return new QueryCacheHibernateArcusStorageAccess(cacheClientPool, qualify(regionName));
     }
 
     @Override
