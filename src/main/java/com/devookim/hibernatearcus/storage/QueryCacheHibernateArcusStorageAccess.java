@@ -13,7 +13,6 @@ public class QueryCacheHibernateArcusStorageAccess extends HibernateArcusStorage
     @Override
     protected String generateKey(Object key) {
         QueryKey queryKey = (QueryKey) key;
-        Map namedParameters = queryKey.getNamedParameters();
-        return super.CACHE_REGION + ":" + queryKey.hashCode() + "#" + namedParameters.values();
+        return super.CACHE_REGION + ":" + queryKey.hashCode() + "#" + queryKey.getNamedParameters().values();
     }
 }
