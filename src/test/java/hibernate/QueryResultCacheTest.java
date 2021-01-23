@@ -130,4 +130,103 @@ public class QueryResultCacheTest extends BaseCoreFunctionalTestCase {
         assertThat(domainDataFromQuery2.getName()).isEqualTo(domainDataStoredInDB.getName());
         Assert.assertEquals(1, stats.getDomainDataRegionStatistics(queryCacheRegion).getHitCount());
     }
+
+    @Test
+    public void testQueryCache_whenTheSameNamedQueryWithNonIdenticalParamQueryCacheExists_thenQueryCacheShouldBeCacheMiss() {
+        String queryCacheRegion = "testQueryCache";
+        Statistics stats = sessionFactory().getStatistics();
+        // given
+        Session s = openSession();
+        s.beginTransaction();
+        DomainData domainDataStoredInDB1 = new DomainData("domainData#" + System.currentTimeMillis());
+        s.save(domainDataStoredInDB1);
+
+        DomainData domainDataStoredInDB2 = new DomainData("domainData#" + System.currentTimeMillis());
+        s.save(domainDataStoredInDB2);
+        s.flush();
+        s.getTransaction().commit();
+
+        s = openSession();
+        s.beginTransaction();
+        Query cacheableQuery1 = s.getNamedQuery("domainDataNamedQuery");
+        cacheableQuery1.setCacheable(true);
+        cacheableQuery1.setCacheRegion(queryCacheRegion);
+        cacheableQuery1.setParameter("name", domainDataStoredInDB1.getName());
+
+        DomainData domainDataToUpdateButRollback = (DomainData) cacheableQuery1.uniqueResult();
+        domainDataToUpdateButRollback.setName("domainData#" + System.currentTimeMillis());
+        s.save(domainDataToUpdateButRollback);
+        s.getTransaction().rollback();
+        s.close();
+
+        Assert.assertEquals(1, stats.getDomainDataRegionStatistics(queryCacheRegion).getPutCount());
+        Assert.assertEquals(0, stats.getDomainDataRegionStatistics(queryCacheRegion).getHitCount());
+        Assert.assertEquals(1, stats.getDomainDataRegionStatistics(queryCacheRegion).getMissCount());
+
+        // when
+        s = openSession();
+        s.beginTransaction();
+        Query query2 = s.getNamedQuery("domainDataNamedQuery");
+        query2.setCacheable(true);
+        query2.setCacheRegion(queryCacheRegion);
+        query2.setParameter("name", domainDataStoredInDB2.getName());
+        DomainData domainDataFromQuery2 = (DomainData) query2.uniqueResult();
+        s.getTransaction().commit();
+        s.close();
+
+        // then
+        Assert.assertEquals(2, stats.getDomainDataRegionStatistics(queryCacheRegion).getPutCount());
+        Assert.assertEquals(0, stats.getDomainDataRegionStatistics(queryCacheRegion).getHitCount());
+        Assert.assertEquals(2, stats.getDomainDataRegionStatistics(queryCacheRegion).getMissCount());
+    }
+
+    @Test
+    public void testQueryCache_whenTheSameNamedQueryWithNonIdenticalRegionQueryCacheExists_thenQueryCacheShouldBeCacheMiss() {
+        String queryCacheRegion1 = "testQueryCache-1";
+        String queryCacheRegion2 = "testQueryCache-2";
+        Statistics stats = sessionFactory().getStatistics();
+        // given
+        Session s = openSession();
+        s.beginTransaction();
+        DomainData domainDataStoredInDB1 = new DomainData("domainData#" + System.currentTimeMillis());
+        s.save(domainDataStoredInDB1);
+
+        DomainData domainDataStoredInDB2 = new DomainData("domainData#" + System.currentTimeMillis());
+        s.save(domainDataStoredInDB2);
+        s.flush();
+        s.getTransaction().commit();
+
+        s = openSession();
+        s.beginTransaction();
+        Query cacheableQuery1 = s.getNamedQuery("domainDataNamedQuery");
+        cacheableQuery1.setCacheable(true);
+        cacheableQuery1.setCacheRegion(queryCacheRegion1);
+        cacheableQuery1.setParameter("name", domainDataStoredInDB1.getName());
+
+        DomainData domainDataToUpdateButRollback = (DomainData) cacheableQuery1.uniqueResult();
+        domainDataToUpdateButRollback.setName("domainData#" + System.currentTimeMillis());
+        s.save(domainDataToUpdateButRollback);
+        s.getTransaction().rollback();
+        s.close();
+
+        Assert.assertEquals(1, stats.getDomainDataRegionStatistics(queryCacheRegion1).getPutCount());
+        Assert.assertEquals(0, stats.getDomainDataRegionStatistics(queryCacheRegion1).getHitCount());
+        Assert.assertEquals(1, stats.getDomainDataRegionStatistics(queryCacheRegion1).getMissCount());
+
+        // when
+        s = openSession();
+        s.beginTransaction();
+        Query query2 = s.getNamedQuery("domainDataNamedQuery");
+        query2.setCacheable(true);
+        query2.setCacheRegion(queryCacheRegion2);
+        query2.setParameter("name", domainDataStoredInDB2.getName());
+        DomainData domainDataFromQuery2 = (DomainData) query2.uniqueResult();
+        s.getTransaction().commit();
+        s.close();
+
+        // then
+        Assert.assertEquals(1, stats.getDomainDataRegionStatistics(queryCacheRegion2).getPutCount());
+        Assert.assertEquals(0, stats.getDomainDataRegionStatistics(queryCacheRegion2).getHitCount());
+        Assert.assertEquals(1, stats.getDomainDataRegionStatistics(queryCacheRegion2).getMissCount());
+    }
 }
