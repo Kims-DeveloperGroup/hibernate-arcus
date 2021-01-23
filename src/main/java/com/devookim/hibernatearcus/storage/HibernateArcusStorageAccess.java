@@ -1,4 +1,4 @@
-package com.devookim.hibernatearcus.factory;
+package com.devookim.hibernatearcus.storage;
 
 import net.spy.memcached.ArcusClientPool;
 import org.hibernate.cache.CacheException;
@@ -29,11 +29,7 @@ public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
         String generatedKey = generateKey(key);
         try {
             Object o = cacheClientPool.get(generatedKey);
-            if (o == null) {
-                log.debug("cacheMiss for {}", generatedKey);
-            } else {
-                log.debug("cacheHit for {}", generatedKey);
-            }
+            log.trace("get key:{} value: {}", generatedKey, o);
             return o;
         } catch (Exception e) {
             log.error("key: {}", generatedKey, e);
@@ -49,7 +45,7 @@ public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
         String generatedKey = generateKey(key);
         try {
             cacheClientPool.set(generatedKey, 0, value).get();
-            log.debug("cachePut for key: {} value: {}", generatedKey, value);
+            log.trace("put key:{} value: {}", generatedKey, value);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             if (fallback) {

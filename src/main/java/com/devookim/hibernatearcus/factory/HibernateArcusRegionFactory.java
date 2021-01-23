@@ -2,6 +2,9 @@ package com.devookim.hibernatearcus.factory;
 
 import com.devookim.hibernatearcus.client.HibernateArcusClientFactory;
 import com.devookim.hibernatearcus.config.ArcusClientConfig;
+import com.devookim.hibernatearcus.storage.DomainDataHibernateArcusStorageAccess;
+import com.devookim.hibernatearcus.storage.HibernateArcusStorageAccess;
+import com.devookim.hibernatearcus.storage.QueryCacheHibernateArcusStorageAccess;
 import lombok.extern.slf4j.Slf4j;
 import net.spy.memcached.ArcusClientPool;
 import org.hibernate.boot.registry.selector.spi.StrategySelector;
@@ -96,7 +99,7 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
     @Override
     protected DomainDataStorageAccess createDomainDataStorageAccess(DomainDataRegionConfig regionConfig, DomainDataRegionBuildingContext buildingContext) {
         ArcusClientPool cacheClientPool = getCache(qualify(regionConfig.getRegionName()));
-        return new HibernateArcusStorageAccess(cacheClientPool,  qualify(regionConfig.getRegionName()));
+        return new DomainDataHibernateArcusStorageAccess(cacheClientPool,  qualify(regionConfig.getRegionName()));
     }
 
     @Override
