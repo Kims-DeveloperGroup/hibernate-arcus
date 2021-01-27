@@ -11,11 +11,11 @@ import javax.persistence.*;
 
 @Entity
 @NamedQueries(@NamedQuery(name = "domainDataNamedQuery", query = "from DomainData where name = :name"))
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = DomainData.CACHE_REGION_NAME)
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = ReadWriteAccessDomainData.CACHE_REGION_NAME)
 @NaturalIdCache
 @Data
 @NoArgsConstructor
-public class DomainData {
+public class ReadWriteAccessDomainData {
     public static final String CACHE_REGION_NAME = "DomainData";
     public static final String NATURAL_ID_CACHE_REGION_NAME = CACHE_REGION_NAME + "__NaturalId";
 
@@ -28,7 +28,7 @@ public class DomainData {
     @NaturalId
     private long naturalId;
 
-    public DomainData(String name) {
+    public ReadWriteAccessDomainData(String name) {
         this.name = name;
         naturalId = System.currentTimeMillis();
     }

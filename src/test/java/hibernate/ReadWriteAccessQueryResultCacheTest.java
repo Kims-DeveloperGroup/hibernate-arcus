@@ -1,7 +1,7 @@
 package hibernate;
 
 import com.devookim.hibernatearcus.factory.HibernateArcusRegionFactory;
-import hibernate.domain.DomainData;
+import hibernate.domain.ReadWriteAccessDomainData;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -17,11 +17,11 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
-public class QueryResultCacheTest extends BaseCoreFunctionalTestCase {
+public class ReadWriteAccessQueryResultCacheTest extends BaseCoreFunctionalTestCase {
 
     @Override
     protected Class<?>[] getAnnotatedClasses() {
-        return new Class[] { DomainData.class};
+        return new Class[] { ReadWriteAccessDomainData.class};
     }
 
     @Override
@@ -49,8 +49,8 @@ public class QueryResultCacheTest extends BaseCoreFunctionalTestCase {
 
         Session s = openSession();
         s.beginTransaction();
-        DomainData domainDataStoredInDB = new DomainData("domainData:" + System.currentTimeMillis());
-        s.save(domainDataStoredInDB);
+        ReadWriteAccessDomainData readWriteAccessDomainDataStoredInDB = new ReadWriteAccessDomainData("domainData:" + System.currentTimeMillis());
+        s.save(readWriteAccessDomainDataStoredInDB);
         s.flush();
         s.getTransaction().commit();
 
@@ -60,7 +60,7 @@ public class QueryResultCacheTest extends BaseCoreFunctionalTestCase {
         Query cacheableQuery1 = s.getNamedQuery("domainDataNamedQuery");
         cacheableQuery1.setCacheable(true);
         cacheableQuery1.setCacheRegion(queryCacheRegionName);
-        cacheableQuery1.setParameter("name", domainDataStoredInDB.getName());
+        cacheableQuery1.setParameter("name", readWriteAccessDomainDataStoredInDB.getName());
         cacheableQuery1.uniqueResult();
         s.getTransaction().commit();
         s.close();
@@ -75,7 +75,7 @@ public class QueryResultCacheTest extends BaseCoreFunctionalTestCase {
         Query cacheableQuery2 = s.getNamedQuery("domainDataNamedQuery");
         cacheableQuery2.setCacheable(true);
         cacheableQuery2.setCacheRegion(queryCacheRegionName);
-        cacheableQuery2.setParameter("name", domainDataStoredInDB.getName());
+        cacheableQuery2.setParameter("name", readWriteAccessDomainDataStoredInDB.getName());
         cacheableQuery2.uniqueResult();
         s.getTransaction().commit();
         s.close();
@@ -93,8 +93,8 @@ public class QueryResultCacheTest extends BaseCoreFunctionalTestCase {
         // given
         Session s = openSession();
         s.beginTransaction();
-        DomainData domainDataStoredInDB = new DomainData("domainData#" + System.currentTimeMillis());
-        s.save(domainDataStoredInDB);
+        ReadWriteAccessDomainData readWriteAccessDomainDataStoredInDB = new ReadWriteAccessDomainData("domainData#" + System.currentTimeMillis());
+        s.save(readWriteAccessDomainDataStoredInDB);
         s.flush();
         s.getTransaction().commit();
 
@@ -104,11 +104,11 @@ public class QueryResultCacheTest extends BaseCoreFunctionalTestCase {
         Query cacheableQuery1 = s.getNamedQuery("domainDataNamedQuery");
         cacheableQuery1.setCacheable(true);
         cacheableQuery1.setCacheRegion(queryCacheRegion);
-        cacheableQuery1.setParameter("name", domainDataStoredInDB.getName());
+        cacheableQuery1.setParameter("name", readWriteAccessDomainDataStoredInDB.getName());
 
-        DomainData domainDataToUpdateButRollback = (DomainData) cacheableQuery1.uniqueResult();
-        domainDataToUpdateButRollback.setName("domainData#" + System.currentTimeMillis());
-        s.save(domainDataToUpdateButRollback);
+        ReadWriteAccessDomainData readWriteAccessDomainDataToUpdateButRollback = (ReadWriteAccessDomainData) cacheableQuery1.uniqueResult();
+        readWriteAccessDomainDataToUpdateButRollback.setName("domainData#" + System.currentTimeMillis());
+        s.save(readWriteAccessDomainDataToUpdateButRollback);
         s.getTransaction().rollback();
         s.close();
 
@@ -122,12 +122,12 @@ public class QueryResultCacheTest extends BaseCoreFunctionalTestCase {
         Query query2 = s.getNamedQuery("domainDataNamedQuery");
         query2.setCacheable(true);
         query2.setCacheRegion(queryCacheRegion);
-        query2.setParameter("name", domainDataStoredInDB.getName());
-        DomainData domainDataFromQuery2 = (DomainData) query2.uniqueResult();
+        query2.setParameter("name", readWriteAccessDomainDataStoredInDB.getName());
+        ReadWriteAccessDomainData readWriteAccessDomainDataFromQuery2 = (ReadWriteAccessDomainData) query2.uniqueResult();
         s.getTransaction().commit();
         s.close();
 
-        assertThat(domainDataFromQuery2.getName()).isEqualTo(domainDataStoredInDB.getName());
+        assertThat(readWriteAccessDomainDataFromQuery2.getName()).isEqualTo(readWriteAccessDomainDataStoredInDB.getName());
         Assert.assertEquals(1, stats.getDomainDataRegionStatistics(queryCacheRegion).getHitCount());
     }
 
@@ -138,11 +138,11 @@ public class QueryResultCacheTest extends BaseCoreFunctionalTestCase {
         // given
         Session s = openSession();
         s.beginTransaction();
-        DomainData domainDataStoredInDB1 = new DomainData("domainData#" + System.currentTimeMillis());
-        s.save(domainDataStoredInDB1);
+        ReadWriteAccessDomainData readWriteAccessDomainDataStoredInDB1 = new ReadWriteAccessDomainData("domainData#" + System.currentTimeMillis());
+        s.save(readWriteAccessDomainDataStoredInDB1);
 
-        DomainData domainDataStoredInDB2 = new DomainData("domainData#" + System.currentTimeMillis());
-        s.save(domainDataStoredInDB2);
+        ReadWriteAccessDomainData readWriteAccessDomainDataStoredInDB2 = new ReadWriteAccessDomainData("domainData#" + System.currentTimeMillis());
+        s.save(readWriteAccessDomainDataStoredInDB2);
         s.flush();
         s.getTransaction().commit();
 
@@ -151,11 +151,11 @@ public class QueryResultCacheTest extends BaseCoreFunctionalTestCase {
         Query cacheableQuery1 = s.getNamedQuery("domainDataNamedQuery");
         cacheableQuery1.setCacheable(true);
         cacheableQuery1.setCacheRegion(queryCacheRegion);
-        cacheableQuery1.setParameter("name", domainDataStoredInDB1.getName());
+        cacheableQuery1.setParameter("name", readWriteAccessDomainDataStoredInDB1.getName());
 
-        DomainData domainDataToUpdateButRollback = (DomainData) cacheableQuery1.uniqueResult();
-        domainDataToUpdateButRollback.setName("domainData#" + System.currentTimeMillis());
-        s.save(domainDataToUpdateButRollback);
+        ReadWriteAccessDomainData readWriteAccessDomainDataToUpdateButRollback = (ReadWriteAccessDomainData) cacheableQuery1.uniqueResult();
+        readWriteAccessDomainDataToUpdateButRollback.setName("domainData#" + System.currentTimeMillis());
+        s.save(readWriteAccessDomainDataToUpdateButRollback);
         s.getTransaction().rollback();
         s.close();
 
@@ -169,8 +169,8 @@ public class QueryResultCacheTest extends BaseCoreFunctionalTestCase {
         Query query2 = s.getNamedQuery("domainDataNamedQuery");
         query2.setCacheable(true);
         query2.setCacheRegion(queryCacheRegion);
-        query2.setParameter("name", domainDataStoredInDB2.getName());
-        DomainData domainDataFromQuery2 = (DomainData) query2.uniqueResult();
+        query2.setParameter("name", readWriteAccessDomainDataStoredInDB2.getName());
+        ReadWriteAccessDomainData readWriteAccessDomainDataFromQuery2 = (ReadWriteAccessDomainData) query2.uniqueResult();
         s.getTransaction().commit();
         s.close();
 
@@ -188,11 +188,11 @@ public class QueryResultCacheTest extends BaseCoreFunctionalTestCase {
         // given
         Session s = openSession();
         s.beginTransaction();
-        DomainData domainDataStoredInDB1 = new DomainData("domainData#" + System.currentTimeMillis());
-        s.save(domainDataStoredInDB1);
+        ReadWriteAccessDomainData readWriteAccessDomainDataStoredInDB1 = new ReadWriteAccessDomainData("domainData#" + System.currentTimeMillis());
+        s.save(readWriteAccessDomainDataStoredInDB1);
 
-        DomainData domainDataStoredInDB2 = new DomainData("domainData#" + System.currentTimeMillis());
-        s.save(domainDataStoredInDB2);
+        ReadWriteAccessDomainData readWriteAccessDomainDataStoredInDB2 = new ReadWriteAccessDomainData("domainData#" + System.currentTimeMillis());
+        s.save(readWriteAccessDomainDataStoredInDB2);
         s.flush();
         s.getTransaction().commit();
 
@@ -201,11 +201,11 @@ public class QueryResultCacheTest extends BaseCoreFunctionalTestCase {
         Query cacheableQuery1 = s.getNamedQuery("domainDataNamedQuery");
         cacheableQuery1.setCacheable(true);
         cacheableQuery1.setCacheRegion(queryCacheRegion1);
-        cacheableQuery1.setParameter("name", domainDataStoredInDB1.getName());
+        cacheableQuery1.setParameter("name", readWriteAccessDomainDataStoredInDB1.getName());
 
-        DomainData domainDataToUpdateButRollback = (DomainData) cacheableQuery1.uniqueResult();
-        domainDataToUpdateButRollback.setName("domainData#" + System.currentTimeMillis());
-        s.save(domainDataToUpdateButRollback);
+        ReadWriteAccessDomainData readWriteAccessDomainDataToUpdateButRollback = (ReadWriteAccessDomainData) cacheableQuery1.uniqueResult();
+        readWriteAccessDomainDataToUpdateButRollback.setName("domainData#" + System.currentTimeMillis());
+        s.save(readWriteAccessDomainDataToUpdateButRollback);
         s.getTransaction().rollback();
         s.close();
 
@@ -219,8 +219,8 @@ public class QueryResultCacheTest extends BaseCoreFunctionalTestCase {
         Query query2 = s.getNamedQuery("domainDataNamedQuery");
         query2.setCacheable(true);
         query2.setCacheRegion(queryCacheRegion2);
-        query2.setParameter("name", domainDataStoredInDB2.getName());
-        DomainData domainDataFromQuery2 = (DomainData) query2.uniqueResult();
+        query2.setParameter("name", readWriteAccessDomainDataStoredInDB2.getName());
+        ReadWriteAccessDomainData readWriteAccessDomainDataFromQuery2 = (ReadWriteAccessDomainData) query2.uniqueResult();
         s.getTransaction().commit();
         s.close();
 
