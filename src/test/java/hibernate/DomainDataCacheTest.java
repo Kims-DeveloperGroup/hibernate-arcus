@@ -190,6 +190,54 @@ public class DomainDataCacheTest extends BaseCoreFunctionalTestCase {
 
         assertThat(domainDataAfterUpdate.getName()).isEqualTo(updatedDomainDataName);
         Assert.assertEquals(2, stats.getDomainDataRegionStatistics(DomainData.CACHE_REGION_NAME).getHitCount());
-        Assert.assertEquals(2, stats.getDomainDataRegionStatistics(DomainData.CACHE_REGION_NAME).getHitCount());
+        Assert.assertEquals(2, stats.getDomainDataRegionStatistics(DomainData.CACHE_REGION_NAME).getPutCount());
+
+        // test data clear
+        s = openSession();
+        s.beginTransaction();
+        s.flush();
+        s.delete(s.get(DomainData.class, id));
+        s.getTransaction().commit();
+        s.close();
+        stats.logSummary();
+    }
+
+    @Test
+    public void testDelete_whenDeleteIsCommitted_thenCacheShouldBeMiss() {
+        Statistics stats = sessionFactory().getStatistics();
+        Long id = null;
+        Session s = openSession();
+        s.beginTransaction();
+        DomainData domainData = new DomainData( "domainData" );
+        id = (Long) s.save( domainData );
+        s.flush();
+        s.getTransaction().commit();
+        s.close();
+        Assert.assertEquals(0, stats.getDomainDataRegionStatistics(DomainData.CACHE_REGION_NAME).getHitCount());
+        Assert.assertEquals(1, stats.getDomainDataRegionStatistics(DomainData.CACHE_REGION_NAME).getPutCount());
+        //save 할때 entity를 가져오는 과정에서 cacheMiss로 로그가 찍히는데 stats에서는 miss로 인식되지 않음
+
+        s = openSession();
+        s.beginTransaction();
+        domainData = s.get(DomainData.class, id);
+        s.delete(domainData);
+        s.flush();
+        s.getTransaction().commit();
+        s.clear();
+        s.close();
+        Assert.assertEquals(1, stats.getDomainDataRegionStatistics(DomainData.CACHE_REGION_NAME).getHitCount());
+        Assert.assertEquals(1, stats.getDomainDataRegionStatistics(DomainData.CACHE_REGION_NAME).getPutCount());
+        Assert.assertEquals(0, stats.getDomainDataRegionStatistics(DomainData.CACHE_REGION_NAME).getMissCount());
+
+        s = openSession();
+        s.beginTransaction();
+        DomainData domainDataAfterDelete = s.get(DomainData.class, id);
+        s.getTransaction().commit();
+        s.close();
+        // delete 된 아이템의  SoftLockImpl이 캐쉬에 남아있을때 로그에 cacheMiss로 안찍히지만  stats 에서 cacheMiss로 인식됨
+        assertThat(domainDataAfterDelete).isNull();
+        Assert.assertEquals(1, stats.getDomainDataRegionStatistics(DomainData.CACHE_REGION_NAME).getHitCount());
+        Assert.assertEquals(1, stats.getDomainDataRegionStatistics(DomainData.CACHE_REGION_NAME).getPutCount());
+        Assert.assertEquals(1, stats.getDomainDataRegionStatistics(DomainData.CACHE_REGION_NAME).getMissCount());
     }
 }
