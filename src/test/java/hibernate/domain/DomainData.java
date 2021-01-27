@@ -26,9 +26,10 @@ public class DomainData {
     private String name;
     
     @NaturalId
-    private String naturalId;
+    private long naturalId;
 
     public DomainData(String name) {
         this.name = name;
+        naturalId = System.currentTimeMillis();
     }
 }

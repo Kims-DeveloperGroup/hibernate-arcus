@@ -112,9 +112,9 @@ public class DomainDataCacheTest extends BaseCoreFunctionalTestCase {
         Statistics stats = sessionFactory().getStatistics();
         Session s = openSession();
         s.beginTransaction();
-        DomainData item = new DomainData("domainData");
-        item.setNaturalId("123");
-        Long id = (Long) s.save(item);
+        DomainData domainData = new DomainData("domainData");
+        final long naturalId = domainData.getNaturalId();
+        Long id = (Long) s.save(domainData);
         s.flush();
         s.getTransaction().commit();
 
@@ -122,8 +122,8 @@ public class DomainDataCacheTest extends BaseCoreFunctionalTestCase {
         
         s = openSession();
         s.beginTransaction();
-        item = s.bySimpleNaturalId(DomainData.class).load("123");
-        assertThat(item).isNotNull();
+        domainData = s.bySimpleNaturalId(DomainData.class).load(naturalId);
+        assertThat(domainData).isNotNull();
         s.getTransaction().commit();
         s.close();
         
