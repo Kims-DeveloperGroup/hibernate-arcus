@@ -67,6 +67,14 @@ public class DomainDataCacheTest extends BaseCoreFunctionalTestCase {
         Assert.assertEquals(0, domainDataRegionStatistics.getMissCount());
         Assert.assertEquals(1, domainDataRegionStatistics.getPutCount());
         Assert.assertEquals(1, domainDataRegionStatistics.getHitCount());
+
+        // test data clear
+        s = openSession();
+        s.beginTransaction();
+        s.flush();
+        s.delete(s.get(DomainData.class, id));
+        s.getTransaction().commit();
+        s.close();
     }
 
     @Test
@@ -119,6 +127,15 @@ public class DomainDataCacheTest extends BaseCoreFunctionalTestCase {
         s.close();
         
         Assert.assertEquals(1, stats.getNaturalIdStatistics(DomainData.class.getName()).getCacheHitCount());
+
+        // test data clear
+        s = openSession();
+        s.beginTransaction();
+        s.flush();
+        DomainData toDelete = s.get(DomainData.class, id);
+        s.delete(toDelete);
+        s.getTransaction().commit();
+        s.close();
     }
     
     @Test
@@ -153,6 +170,14 @@ public class DomainDataCacheTest extends BaseCoreFunctionalTestCase {
         s.close();
 
         Assert.assertEquals(1, stats.getDomainDataRegionStatistics(DomainData.CACHE_REGION_NAME).getHitCount());
+
+        // test data clear
+        s = openSession();
+        s.beginTransaction();
+        s.flush();
+        s.delete(s.get(DomainData.class, id));
+        s.getTransaction().commit();
+        s.close();
     }
 
     @Test
