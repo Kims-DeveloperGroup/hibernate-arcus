@@ -28,9 +28,9 @@ public class DomainDataHibernateArcusStorageAccess extends HibernateArcusStorage
     public void putIntoCache(Object key, Object value, SharedSessionContractImplementor session) {
         super.putIntoCache(key, value, session);
         if (value instanceof AbstractReadWriteAccess.SoftLockImpl) {
-            log.trace("cacheLock key: {} lock: {}", key, value);
+            log.trace("cacheLock key: {} lock: {}", generateKey(key), value);
         } else {
-            log.debug("cachePut key: {} value: {}", key, value);
+            log.debug("cachePut key: {} value: {}", generateKey(key), value);
         }
     }
 }
