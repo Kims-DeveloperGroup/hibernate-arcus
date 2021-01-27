@@ -56,6 +56,12 @@ public class DomainDataCacheTest extends BaseCoreFunctionalTestCase {
         s.close();
 
         // when
+        Assert.assertEquals(0, domainDataRegionStatistics.getMissCount());
+        Assert.assertEquals(1, domainDataRegionStatistics.getPutCount());
+        Assert.assertEquals(0, domainDataRegionStatistics.getHitCount());
+
+
+        // when
         s = openSession();
         s.beginTransaction();
         item = (DomainData) s.get(DomainData.class, id);
@@ -85,16 +91,12 @@ public class DomainDataCacheTest extends BaseCoreFunctionalTestCase {
         s.beginTransaction();
         DomainData item = new DomainData( "domainData" );
         id = (Long) s.save( item );
-        log.info("saved: {}", item);
         s.flush();
         s.getTransaction().rollback();
-        log.info("transaction rollback");
         s.close();
-        log.info("id: {}", id);
 
         s = openSession();
         s.beginTransaction();
-        log.info("id: {}", id);
         item = s.get(DomainData.class, id);
         Assert.assertNull(item);
         s.getTransaction().commit();
@@ -112,7 +114,7 @@ public class DomainDataCacheTest extends BaseCoreFunctionalTestCase {
         s.beginTransaction();
         DomainData item = new DomainData("domainData");
         item.setNaturalId("123");
-        s.save(item);
+        Long id = (Long) s.save(item);
         s.flush();
         s.getTransaction().commit();
 
@@ -122,7 +124,6 @@ public class DomainDataCacheTest extends BaseCoreFunctionalTestCase {
         s.beginTransaction();
         item = s.bySimpleNaturalId(DomainData.class).load("123");
         assertThat(item).isNotNull();
-        s.delete(item);
         s.getTransaction().commit();
         s.close();
         
@@ -186,8 +187,8 @@ public class DomainDataCacheTest extends BaseCoreFunctionalTestCase {
         Long id = null;
         Session s = openSession();
         s.beginTransaction();
-        DomainData item = new DomainData( "domainData" );
-        id = (Long) s.save( item );
+        DomainData domainData = new DomainData( "domainData" );
+        id = (Long) s.save( domainData );
         s.flush();
         s.getTransaction().commit();
         s.close();
@@ -196,10 +197,10 @@ public class DomainDataCacheTest extends BaseCoreFunctionalTestCase {
 
         s = openSession();
         s.beginTransaction();
-        item = s.get(DomainData.class, id);
+        domainData = s.get(DomainData.class, id);
         String updatedDomainDataName = "newDomainData";
-        item.setName(updatedDomainDataName);
-        s.update(item);
+        domainData.setName(updatedDomainDataName);
+        s.update(domainData);
         s.flush();
         s.getTransaction().commit();
         s.clear();
