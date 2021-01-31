@@ -12,7 +12,7 @@ import javax.persistence.*;
 
 
 @Entity
-@NamedQueries(@NamedQuery(name = TransactionalAccessDomainData.NAMED_QUERY_NAME, query = "from DomainDataTransactional where name = :name"))
+@NamedQueries(@NamedQuery(name = TransactionalAccessDomainData.NAMED_QUERY_NAME, query = "from TransactionalAccessDomainData where name = :name"))
 @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL, region = TransactionalAccessDomainData.CACHE_REGION_NAME)
 @NaturalIdCache
 @Data
