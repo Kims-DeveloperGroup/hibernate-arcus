@@ -20,7 +20,6 @@ public class ReadWriteAccessDomainData {
     public static final String NATURAL_ID_CACHE_REGION_NAME = CACHE_REGION_NAME + "__NaturalId";
 
     @Id
-    @GeneratedValue(generator = "increment")
     private Long id;
 
     private String name;
@@ -28,8 +27,9 @@ public class ReadWriteAccessDomainData {
     @NaturalId
     private long naturalId;
 
-    public ReadWriteAccessDomainData(String name) {
+    public ReadWriteAccessDomainData(Long idAndNaturalId, String name) {
         this.name = name;
-        naturalId = System.currentTimeMillis();
+        id = idAndNaturalId;
+        naturalId = idAndNaturalId;
     }
 }

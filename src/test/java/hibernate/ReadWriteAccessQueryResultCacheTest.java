@@ -49,7 +49,7 @@ public class ReadWriteAccessQueryResultCacheTest extends BaseCoreFunctionalTestC
 
         Session s = openSession();
         s.beginTransaction();
-        ReadWriteAccessDomainData readWriteAccessDomainDataStoredInDB = new ReadWriteAccessDomainData("domainData:" + System.currentTimeMillis());
+        ReadWriteAccessDomainData readWriteAccessDomainDataStoredInDB = new ReadWriteAccessDomainData(System.currentTimeMillis(), "domainData:" + System.currentTimeMillis());
         s.save(readWriteAccessDomainDataStoredInDB);
         s.flush();
         s.getTransaction().commit();
@@ -93,7 +93,7 @@ public class ReadWriteAccessQueryResultCacheTest extends BaseCoreFunctionalTestC
         // given
         Session s = openSession();
         s.beginTransaction();
-        ReadWriteAccessDomainData readWriteAccessDomainDataStoredInDB = new ReadWriteAccessDomainData("domainData#" + System.currentTimeMillis());
+        ReadWriteAccessDomainData readWriteAccessDomainDataStoredInDB = new ReadWriteAccessDomainData(System.currentTimeMillis(), "domainData#" + System.currentTimeMillis());
         s.save(readWriteAccessDomainDataStoredInDB);
         s.flush();
         s.getTransaction().commit();
@@ -138,10 +138,10 @@ public class ReadWriteAccessQueryResultCacheTest extends BaseCoreFunctionalTestC
         // given
         Session s = openSession();
         s.beginTransaction();
-        ReadWriteAccessDomainData readWriteAccessDomainDataStoredInDB1 = new ReadWriteAccessDomainData("domainData#" + System.currentTimeMillis());
+        ReadWriteAccessDomainData readWriteAccessDomainDataStoredInDB1 = new ReadWriteAccessDomainData(System.currentTimeMillis(), "domainData#" + System.currentTimeMillis());
         s.save(readWriteAccessDomainDataStoredInDB1);
 
-        ReadWriteAccessDomainData readWriteAccessDomainDataStoredInDB2 = new ReadWriteAccessDomainData("domainData#" + System.currentTimeMillis());
+        ReadWriteAccessDomainData readWriteAccessDomainDataStoredInDB2 = new ReadWriteAccessDomainData(System.currentTimeMillis() + 1, "domainData#" + System.currentTimeMillis() + 1);
         s.save(readWriteAccessDomainDataStoredInDB2);
         s.flush();
         s.getTransaction().commit();
@@ -188,10 +188,10 @@ public class ReadWriteAccessQueryResultCacheTest extends BaseCoreFunctionalTestC
         // given
         Session s = openSession();
         s.beginTransaction();
-        ReadWriteAccessDomainData readWriteAccessDomainDataStoredInDB1 = new ReadWriteAccessDomainData("domainData#" + System.currentTimeMillis());
+        ReadWriteAccessDomainData readWriteAccessDomainDataStoredInDB1 = new ReadWriteAccessDomainData(System.currentTimeMillis(), "domainData#" + System.currentTimeMillis());
         s.save(readWriteAccessDomainDataStoredInDB1);
 
-        ReadWriteAccessDomainData readWriteAccessDomainDataStoredInDB2 = new ReadWriteAccessDomainData("domainData#" + System.currentTimeMillis());
+        ReadWriteAccessDomainData readWriteAccessDomainDataStoredInDB2 = new ReadWriteAccessDomainData(System.currentTimeMillis() + 1, "domainData#" + System.currentTimeMillis() + 1);
         s.save(readWriteAccessDomainDataStoredInDB2);
         s.flush();
         s.getTransaction().commit();

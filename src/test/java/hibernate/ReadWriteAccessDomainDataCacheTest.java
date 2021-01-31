@@ -49,7 +49,7 @@ public class ReadWriteAccessDomainDataCacheTest extends BaseCoreFunctionalTestCa
         Long id = null;
         Session s = openSession();
         s.beginTransaction();
-        ReadWriteAccessDomainData item = new ReadWriteAccessDomainData( "domainData" );
+        ReadWriteAccessDomainData item = new ReadWriteAccessDomainData(System.currentTimeMillis(),  "domainData" );
         id = (Long) s.save( item );
         s.flush();
         s.getTransaction().commit();
@@ -89,7 +89,7 @@ public class ReadWriteAccessDomainDataCacheTest extends BaseCoreFunctionalTestCa
         Long id = null;
         Session s = openSession();
         s.beginTransaction();
-        ReadWriteAccessDomainData item = new ReadWriteAccessDomainData( "domainData" );
+        ReadWriteAccessDomainData item = new ReadWriteAccessDomainData(System.currentTimeMillis(), "domainData");
         id = (Long) s.save( item );
         s.flush();
         s.getTransaction().rollback();
@@ -112,7 +112,7 @@ public class ReadWriteAccessDomainDataCacheTest extends BaseCoreFunctionalTestCa
         Statistics stats = sessionFactory().getStatistics();
         Session s = openSession();
         s.beginTransaction();
-        ReadWriteAccessDomainData readWriteAccessDomainData = new ReadWriteAccessDomainData("domainData");
+        ReadWriteAccessDomainData readWriteAccessDomainData = new ReadWriteAccessDomainData(System.currentTimeMillis(), "domainData");
         final long naturalId = readWriteAccessDomainData.getNaturalId();
         Long id = (Long) s.save(readWriteAccessDomainData);
         s.flush();
@@ -146,7 +146,7 @@ public class ReadWriteAccessDomainDataCacheTest extends BaseCoreFunctionalTestCa
         Session s = openSession();
         s.beginTransaction();
         String expectedDomainDataNameAfterRollback = "domainData";
-        ReadWriteAccessDomainData item = new ReadWriteAccessDomainData(expectedDomainDataNameAfterRollback);
+        ReadWriteAccessDomainData item = new ReadWriteAccessDomainData(System.currentTimeMillis(), expectedDomainDataNameAfterRollback);
         id = (Long) s.save( item );
         s.flush();
         s.getTransaction().commit();
@@ -187,7 +187,7 @@ public class ReadWriteAccessDomainDataCacheTest extends BaseCoreFunctionalTestCa
         Long id = null;
         Session s = openSession();
         s.beginTransaction();
-        ReadWriteAccessDomainData readWriteAccessDomainData = new ReadWriteAccessDomainData( "domainData" );
+        ReadWriteAccessDomainData readWriteAccessDomainData = new ReadWriteAccessDomainData(System.currentTimeMillis(), "domainData");
         id = (Long) s.save(readWriteAccessDomainData);
         s.flush();
         s.getTransaction().commit();
@@ -234,7 +234,7 @@ public class ReadWriteAccessDomainDataCacheTest extends BaseCoreFunctionalTestCa
         Long id = null;
         Session s = openSession();
         s.beginTransaction();
-        ReadWriteAccessDomainData readWriteAccessDomainData = new ReadWriteAccessDomainData( "domainData" );
+        ReadWriteAccessDomainData readWriteAccessDomainData = new ReadWriteAccessDomainData(System.currentTimeMillis(), "domainData");
         id = (Long) s.save(readWriteAccessDomainData);
         s.flush();
         s.getTransaction().commit();
