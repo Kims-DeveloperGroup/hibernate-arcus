@@ -2,6 +2,7 @@ package hibernate;
 
 import com.devookim.hibernatearcus.factory.HibernateArcusRegionFactory;
 import hibernate.domain.TransactionalAccessDomainData;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
@@ -15,11 +16,6 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * 
- * @author Nikita Koksharov
- *
- */
 public class TransactionalAccessDomainDataCacheTest extends BaseCoreFunctionalTestCase {
 
     @Override
