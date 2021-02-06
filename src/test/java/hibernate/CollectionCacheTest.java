@@ -45,7 +45,7 @@ public class CollectionCacheTest extends BaseCoreFunctionalTestCase {
     }
 
     @Entity
-    @Cache(usage = CacheConcurrencyStrategy.READ_ONLY, region = "ChildDomainData")
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "ChildDomainData")
     public static class ChildDomainData implements Serializable {
       @Id
       @Column(name = "CHILD_ID")
