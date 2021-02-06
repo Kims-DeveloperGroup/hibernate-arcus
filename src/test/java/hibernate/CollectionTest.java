@@ -48,6 +48,8 @@ public class CollectionTest extends BaseCoreFunctionalTestCase {
       @Id
       @Column(name = "CHILD_ID")
       long childId;
+
+      String value = "";
     }
 
     @Override
@@ -111,6 +113,60 @@ public class CollectionTest extends BaseCoreFunctionalTestCase {
         s.close();
 
         Assert.assertEquals(1, collectionTestCacheStats.getHitCount());
+        Assert.assertEquals(1, collectionTestCacheStats.getPutCount());
+    }
+
+    @Test
+    public void testCollectionCache_whenDataInCollectionIsUpdated_thenThenNextGetShouldBeCacheHitAndDataAlsoShouldBeUpdated() {
+        CacheRegionStatistics collectionTestCacheStats = sessionFactory().getStatistics()
+                .getCacheRegionStatistics("hibernate.CollectionTest$ParentDomainData.children");
+
+        Session s = openSession();
+        s.beginTransaction();
+
+        ParentDomainData parentDomainData = new ParentDomainData();
+        long parentDomainDataId = System.currentTimeMillis();
+        parentDomainData.parentId = parentDomainDataId;
+        long joinKey = System.currentTimeMillis();
+        parentDomainData.uniqueField = String.valueOf(joinKey);
+        ChildDomainData childDomainData = new ChildDomainData();
+        childDomainData.childId = joinKey;
+        s.save(childDomainData);
+        parentDomainData.children.add(childDomainData);
+        s.save(parentDomainData);
+        s.flush();
+        s.getTransaction().commit();
+
+        s = openSession();
+        s.beginTransaction();
+        ParentDomainData parentDomainData1 = s.get(ParentDomainData.class, parentDomainDataId);
+        assertThat(parentDomainData1.children).hasSize(1);
+        s.getTransaction().commit();
+
+        Assert.assertEquals(0, collectionTestCacheStats.getHitCount());
+        Assert.assertEquals(1, collectionTestCacheStats.getPutCount());
+
+        System.out.println("======before update");
+        s = openSession();
+        s.beginTransaction();
+        ParentDomainData parentDomainData2 = s.get(ParentDomainData.class, parentDomainDataId);
+        assertThat(parentDomainData2.children.size()).isEqualTo(1);
+        parentDomainData2.children.get(0).value = "updated";
+        s.update(parentDomainData2);
+        s.flush();
+        s.getTransaction().commit();
+        s.close();
+
+        Assert.assertEquals(1, collectionTestCacheStats.getHitCount());
+        Assert.assertEquals(1, collectionTestCacheStats.getPutCount());
+
+        s = openSession();
+        s.beginTransaction();
+        ParentDomainData parentDomainData3 = s.get(ParentDomainData.class, parentDomainDataId);
+        assertThat(parentDomainData3.children.get(0).value).isEqualTo("updated");
+        s.getTransaction().commit();
+        s.close();
+        Assert.assertEquals(2, collectionTestCacheStats.getHitCount());
         Assert.assertEquals(1, collectionTestCacheStats.getPutCount());
     }
 }
