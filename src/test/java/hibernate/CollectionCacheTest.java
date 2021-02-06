@@ -19,7 +19,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CollectionTest extends BaseCoreFunctionalTestCase {
+public class CollectionCacheTest extends BaseCoreFunctionalTestCase {
+
+    private final String collectionCacheRegionName = "hibernate.CollectionCacheTest$ParentDomainData.children";
 
     @Entity
     @Cache(usage = CacheConcurrencyStrategy.READ_ONLY, region = "ParentDomainData")
@@ -78,7 +80,7 @@ public class CollectionTest extends BaseCoreFunctionalTestCase {
     @Test
     public void testCollectionCache_whenCollectionCacheIsPut_thenCollectionCacheShouldBeHitForTheNextGet() {
         CacheRegionStatistics collectionTestCacheStats = sessionFactory().getStatistics()
-                .getCacheRegionStatistics("hibernate.CollectionTest$ParentDomainData.children");
+                .getCacheRegionStatistics(collectionCacheRegionName);
 
         Session s = openSession();
         s.beginTransaction();
@@ -119,7 +121,7 @@ public class CollectionTest extends BaseCoreFunctionalTestCase {
     @Test
     public void testCollectionCache_whenDataInCollectionIsUpdated_thenThenNextGetShouldBeCacheHitAndDataAlsoShouldBeUpdated() {
         CacheRegionStatistics collectionTestCacheStats = sessionFactory().getStatistics()
-                .getCacheRegionStatistics("hibernate.CollectionTest$ParentDomainData.children");
+                .getCacheRegionStatistics(collectionCacheRegionName);
 
         Session s = openSession();
         s.beginTransaction();
