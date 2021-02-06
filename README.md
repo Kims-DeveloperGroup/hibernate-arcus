@@ -36,3 +36,14 @@ public static class ParentDomainData implements Serializable {
 ...
 }           
 ```
+
+### How to run tests
+1. Run arcus cache locally <br>
+Run the docker-compose in the project root
+```
+docker-compose up
+```
+ 2.
+```
+gradle test
+```
