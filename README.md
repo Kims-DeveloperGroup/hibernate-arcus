@@ -45,5 +45,5 @@ docker-compose up
 ```
  2.
 ```
-gradle test
+gradlew clean test --info
 ```
