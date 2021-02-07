@@ -10,6 +10,7 @@ repositories {
 }
 
 dependencies {
+    compile group: 'org.springframework', name: 'spring-context', version: '5.2.12.RELEASE'
     compile group: 'com.navercorp.arcus', name: 'arcus-java-client', version: '1.12.1'
     compile group: 'org.hibernate', name: 'hibernate-core', version: '5.4.22.Final'
     compile group: 'org.projectlombok', name: 'lombok', version: '1.18.4'
