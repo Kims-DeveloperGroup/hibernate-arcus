@@ -15,9 +15,13 @@ import org.hibernate.cache.cfg.spi.DomainDataRegionConfig;
 import org.hibernate.cache.spi.CacheKeysFactory;
 import org.hibernate.cache.spi.DomainDataRegion;
 import org.hibernate.cache.spi.access.AccessType;
-import org.hibernate.cache.spi.support.*;
+import org.hibernate.cache.spi.support.DomainDataRegionImpl;
+import org.hibernate.cache.spi.support.DomainDataStorageAccess;
+import org.hibernate.cache.spi.support.RegionFactoryTemplate;
+import org.hibernate.cache.spi.support.StorageAccess;
 import org.hibernate.cfg.Environment;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import java.util.Map;
@@ -28,6 +32,9 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
     private HibernateArcusClientFactory hibernateArcusClientFactory;
     private CacheKeysFactory cacheKeysFactory;
     protected boolean fallback;
+
+    @Autowired
+    private ArcusClientConfig arcusClientConfig;
 
     @PostConstruct
     public void postConstruct() {
@@ -40,18 +47,19 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
     }
 
     @Override
-    protected void prepareForUse(SessionFactoryOptions settings, @SuppressWarnings("rawtypes") Map properties) throws CacheException {
-        this.hibernateArcusClientFactory = createArcus(properties);
-
-        fallback = true;
+    protected void prepareForUse(SessionFactoryOptions settings, Map properties) throws CacheException {
+        if (arcusClientConfig == null) {
+            arcusClientConfig = new ArcusClientConfig(
+                    properties.getOrDefault("hibernate.cache.arcus.host", "localhost:2181").toString(),
+                    properties.getOrDefault("hibernate.cache.arcus.serviceCode", "").toString(),
+                    Integer.parseInt(properties.getOrDefault("hibernate.cache.arcus.poolSize", 1).toString())
+            );
+        }
+        this.hibernateArcusClientFactory = new HibernateArcusClientFactory(this.arcusClientConfig);
 
         StrategySelector selector = settings.getServiceRegistry().getService(StrategySelector.class);
         cacheKeysFactory = selector.resolveDefaultableStrategy(CacheKeysFactory.class,
                 properties.get(Environment.CACHE_KEYS_FACTORY), new HibernateArcusCacheKeysFactory());
-    }
-
-    protected HibernateArcusClientFactory createArcus(Map<Object, Object> properties) {
-        return new HibernateArcusClientFactory(new ArcusClientConfig("localhost:12181", "test", 1));
     }
 
     @Override
