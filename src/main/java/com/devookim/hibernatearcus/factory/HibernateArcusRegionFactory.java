@@ -52,7 +52,7 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
                 Integer.parseInt(properties.getOrDefault("hibernate.cache.arcus.poolSize", 1).toString())
         );
         this.hibernateArcusClientFactory = new HibernateArcusClientFactory(arcusClientConfig);
-
+        fallback = true;
         StrategySelector selector = settings.getServiceRegistry().getService(StrategySelector.class);
         cacheKeysFactory = selector.resolveDefaultableStrategy(CacheKeysFactory.class,
                 properties.get(Environment.CACHE_KEYS_FACTORY), new HibernateArcusCacheKeysFactory());
