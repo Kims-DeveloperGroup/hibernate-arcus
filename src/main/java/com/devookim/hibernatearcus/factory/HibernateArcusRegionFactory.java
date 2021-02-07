@@ -33,9 +33,6 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
     private CacheKeysFactory cacheKeysFactory;
     protected boolean fallback;
 
-    @Autowired
-    private ArcusClientConfig arcusClientConfig;
-
     @PostConstruct
     public void postConstruct() {
         log.debug("HibernateArcusRegionFactory is initialized");
@@ -48,14 +45,13 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
 
     @Override
     protected void prepareForUse(SessionFactoryOptions settings, Map properties) throws CacheException {
-        if (arcusClientConfig == null) {
-            arcusClientConfig = new ArcusClientConfig(
-                    properties.getOrDefault("hibernate.cache.arcus.host", "localhost:2181").toString(),
-                    properties.getOrDefault("hibernate.cache.arcus.serviceCode", "").toString(),
-                    Integer.parseInt(properties.getOrDefault("hibernate.cache.arcus.poolSize", 1).toString())
-            );
-        }
-        this.hibernateArcusClientFactory = new HibernateArcusClientFactory(this.arcusClientConfig);
+
+        ArcusClientConfig arcusClientConfig = new ArcusClientConfig(
+                properties.getOrDefault("hibernate.cache.arcus.host", "localhost:2181").toString(),
+                properties.getOrDefault("hibernate.cache.arcus.serviceCode", "").toString(),
+                Integer.parseInt(properties.getOrDefault("hibernate.cache.arcus.poolSize", 1).toString())
+        );
+        this.hibernateArcusClientFactory = new HibernateArcusClientFactory(arcusClientConfig);
 
         StrategySelector selector = settings.getServiceRegistry().getService(StrategySelector.class);
         cacheKeysFactory = selector.resolveDefaultableStrategy(CacheKeysFactory.class,
