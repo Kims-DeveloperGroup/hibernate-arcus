@@ -39,15 +39,16 @@ hibernate.cache.arcus.host=${hostName}:{$port}
 
 #### 3. Attach @Cache annotation to a entity class <br>
 ```
-@Cache(usage = CacheConcurrencyStrategy.READ_ONLY, region = "ParentDomainData")
+@Cache(usage = ${CacheConcurrencyStrategy}, region = "${regionName}")
 public static class ParentDomainData implements Serializable {
 ...
 }           
 ```
 
 ### How to run tests
-1. Run arcus cache locally <br>
-Run the docker-compose in the project root
+1. Run arcus cache locally (_docker image is ready. https://hub.docker.com/repository/docker/devookim/arcus-memcached_) <br>
+
+Just run the docker-compose in the project root
 ```
 docker-compose up
 ```
