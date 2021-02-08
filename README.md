@@ -18,6 +18,10 @@ if you use spring jpa
 spring.jpa.properties.hibernate.cache.region.factory_class=com.devookim.hibernatearcus.factory.HibernateArcusRegionFactory
 spring.jpa.properties.hibernate.cache.use_second_level_cache=true
 spring.jpa.properties.hibernate.cache.use_query_cache=true
+
+spring.jpa.properties.hibernate.cache.arcus.serviceCode=${arcus_service_code}
+spring.jpa.properties.hibernate.cache.arcus.poolSize=${arcus_client_pool_size}
+spring.jpa.properties.hibernate.cache.arcus.host=${hostName}:{$port}
 ```
 
 or if you use only hibernate
@@ -27,6 +31,10 @@ or if you use only hibernate
 hibernate.cache.region.factory_class=com.devookim.hibernatearcus.factory.HibernateArcusRegionFactory
 hibernate.cache.use_second_level_cache=true
 hibernate.cache.use_query_cache=true
+
+hibernate.cache.arcus.serviceCode=${arcus_service_code}
+hibernate.cache.arcus.poolSize=${arcus_client_pool_size}
+hibernate.cache.arcus.host=${hostName}:{$port}
 ```
 
 #### 3. Attach @Cache annotation to a entity class <br>
