@@ -3,8 +3,6 @@ package com.devookim.hibernatearcus.config;
 import net.spy.memcached.ArcusClient;
 import net.spy.memcached.ArcusClientPool;
 import net.spy.memcached.ConnectionFactoryBuilder;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
 
 public class ArcusClientConfig {
     private final int poolSize;
