@@ -27,9 +27,13 @@ public class ReadWriteAccessDomainData {
     @NaturalId
     private long naturalId;
 
+    @NaturalId
+    private String naturalId2;
+
     public ReadWriteAccessDomainData(Long idAndNaturalId, String name) {
         this.name = name;
         id = idAndNaturalId;
         naturalId = idAndNaturalId;
+        naturalId2 = name + idAndNaturalId;
     }
 }

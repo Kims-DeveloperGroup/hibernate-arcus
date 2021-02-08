@@ -114,6 +114,7 @@ public class ReadWriteAccessDomainDataCacheTest extends BaseCoreFunctionalTestCa
         s.beginTransaction();
         ReadWriteAccessDomainData readWriteAccessDomainData = new ReadWriteAccessDomainData(System.currentTimeMillis(), "domainData");
         final long naturalId = readWriteAccessDomainData.getNaturalId();
+        final String naturalId2 = readWriteAccessDomainData.getNaturalId2();
         Long id = (Long) s.save(readWriteAccessDomainData);
         s.flush();
         s.getTransaction().commit();
@@ -122,7 +123,10 @@ public class ReadWriteAccessDomainDataCacheTest extends BaseCoreFunctionalTestCa
         
         s = openSession();
         s.beginTransaction();
-        readWriteAccessDomainData = s.bySimpleNaturalId(ReadWriteAccessDomainData.class).load(naturalId);
+        readWriteAccessDomainData = s.byNaturalId(ReadWriteAccessDomainData.class)
+                .using("naturalId", naturalId)
+                .using("naturalId2", naturalId2)
+                .load();
         assertThat(readWriteAccessDomainData).isNotNull();
         s.getTransaction().commit();
         s.close();
