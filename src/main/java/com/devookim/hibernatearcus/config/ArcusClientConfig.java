@@ -6,10 +6,12 @@ import net.spy.memcached.ConnectionFactoryBuilder;
 
 public class ArcusClientConfig {
     private final int poolSize;
-    String host;
-    String serviceCode;
+    private final String host;
+    private final String serviceCode;
 
-    public ArcusClientConfig(String host, String serviceCode, int poolSize) {
+    public ArcusClientConfig(String host,
+                             String serviceCode,
+                             int poolSize) {
         this.host = host;
         this.serviceCode = serviceCode;
         this.poolSize = poolSize;
