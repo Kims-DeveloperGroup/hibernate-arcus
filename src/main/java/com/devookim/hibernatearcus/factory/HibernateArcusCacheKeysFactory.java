@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.cache.internal.DefaultCacheKeysFactory;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.persister.collection.CollectionPersister;
+import org.hibernate.persister.entity.EntityPersister;
 
 import javax.persistence.Id;
 import java.io.Serializable;
@@ -29,6 +30,22 @@ public class HibernateArcusCacheKeysFactory extends DefaultCacheKeysFactory {
         }
     }
 
+    static class EntityKey implements Serializable {
+        private final String entityName;
+        private final Object id;
+
+        public EntityKey(String entityName, Object id) {
+            this.entityName = entityName;
+            this.id = id;
+        }
+
+        @Override
+        public String toString() {
+            String[] splitByDot = entityName.split("\\.");
+            return splitByDot[splitByDot.length - 1] + "#" + id;
+        }
+    }
+
     @Override
     public Object createCollectionKey(Object id, CollectionPersister persister, SessionFactoryImplementor factory, String tenantIdentifier) {
         try {
@@ -44,5 +61,10 @@ public class HibernateArcusCacheKeysFactory extends DefaultCacheKeysFactory {
             log.error("Error occurred in createCollectionKey.", e);
         }
         return super.createCollectionKey(id, persister, factory, tenantIdentifier);
+    }
+
+    @Override
+    public Object createEntityKey(Object id, EntityPersister persister, SessionFactoryImplementor factory, String tenantIdentifier) {
+        return new EntityKey(persister.getRootEntityName(), id);
     }
 }
