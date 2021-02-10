@@ -73,7 +73,7 @@ long someNaturalId;
 You may want to cache queries, then attach @QueryHint
 ```
 @QueryHints(value = {@QueryHint(value="true", name = HINT_CACHEABLE)})
-    Optional<PayAccount> findByName(String name);
+    Optional<Entity> findByName(String name);
 ```
 ----
 <br><br>
