@@ -11,7 +11,8 @@ _Hibernate second cache interface puts the result entities into a provided cache
 ### Quick Tutorial
 
 #### 1. Add the hibernate-arcus
-_Maven Gradle not supported yet_
+_MavenCentral Deployment in progress_ <br>
+Request jira ticket: https://issues.sonatype.org/browse/OSSRH-64363
 <br>
 <br>
 #### 2. Set the properties below
