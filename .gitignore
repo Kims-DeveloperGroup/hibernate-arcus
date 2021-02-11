@@ -5,3 +5,4 @@ gradlew
 gradle
 gradlew.bat
 out
+*.archived
