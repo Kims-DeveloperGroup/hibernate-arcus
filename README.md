@@ -55,8 +55,12 @@ public static class ParentDomainData implements Serializable {
   @Id
   long id;
 ...
-}           
+}
 ```
+_Note: **when changing CacheConcurrencyStrategy, regionName also should be modified not to reuse exsting cache items**.<br>
+For more detail: [When @Cache.usage changes, casting exception is thrown](https://github.com/Kims-DeveloperGroup/hibernate-arcus/issues/1)_
+<br><br>
+
 2. @NaturalId <br>
 You may want to cache entities with a natural id, then attach @NaturalId annotation
 ```
