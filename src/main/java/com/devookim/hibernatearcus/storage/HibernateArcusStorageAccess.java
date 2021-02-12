@@ -34,7 +34,7 @@ public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
             log.trace("get key:{} value: {}", generatedKey, o);
             return o;
         } catch (Exception e) {
-            log.error("fallbackEnabled: {} key: {}", arcusClientFactory.fallbackEnabled, generatedKey, e);
+            log.error("fallbackEnabled: {} key: {} errorMsg: {}", arcusClientFactory.fallbackEnabled, generatedKey, e.getMessage());
             if (arcusClientFactory.fallbackEnabled) {
                 return null;
             }
@@ -54,7 +54,7 @@ public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
             arcusClientFactory.getClientPool().set(generatedKey, 0, value).get();
             log.trace("put key:{} value: {}", generatedKey, value);
         } catch (Exception e) {
-            log.error("fallbackEnabled: {} key: {}", arcusClientFactory.fallbackEnabled, generatedKey, e);
+            log.error("fallbackEnabled: {} key: {} errorMsg: {}", arcusClientFactory.fallbackEnabled, generatedKey, e.getMessage());
             if (arcusClientFactory.fallbackEnabled) {
                 return;
             }
@@ -75,7 +75,7 @@ public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
             log.info("containKey for {} contains: {}", generatedKey, result != null);
             return result != null;
         } catch (Exception e) {
-            log.error("fallbackEnabled: {} key: {}", arcusClientFactory.fallbackEnabled, generatedKey, e);
+            log.error("fallbackEnabled: {} key: {} errorMsg: {}", arcusClientFactory.fallbackEnabled, generatedKey, e.getMessage());
             if (arcusClientFactory.fallbackEnabled) {
                 return false;
             }
@@ -92,7 +92,7 @@ public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
         try {
             log.info("cacheEvict for {}", CACHE_REGION);
         } catch (Exception e) {
-            log.error("fallbackEnabled: {} region: {}", arcusClientFactory.fallbackEnabled, CACHE_REGION, e);
+            log.error("fallbackEnabled: {} region: {} errorMsg: {}", arcusClientFactory.fallbackEnabled, CACHE_REGION, e.getMessage());
             if (arcusClientFactory.fallbackEnabled) {
                 return;
             }
@@ -111,7 +111,7 @@ public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
             log.info("cacheEvict for {}", generatedKey);
             arcusClientFactory.getClientPool().delete(generatedKey).get();
         } catch (Exception e) {
-            log.error("fallbackEnabled: {} key: {}", arcusClientFactory.fallbackEnabled, generatedKey, e);
+            log.error("fallbackEnabled: {} key: {} errorMsg: {}", arcusClientFactory.fallbackEnabled, generatedKey, e.getMessage());
             if (arcusClientFactory.fallbackEnabled) {
                 return;
             }
