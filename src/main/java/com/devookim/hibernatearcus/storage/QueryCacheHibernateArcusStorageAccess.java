@@ -1,13 +1,11 @@
 package com.devookim.hibernatearcus.storage;
 
-import net.spy.memcached.ArcusClientPool;
+import com.devookim.hibernatearcus.client.HibernateArcusClientFactory;
 import org.hibernate.cache.spi.QueryKey;
 
-import java.util.Map;
-
 public class QueryCacheHibernateArcusStorageAccess extends HibernateArcusStorageAccess {
-    public QueryCacheHibernateArcusStorageAccess(ArcusClientPool arcusClientPool, String prefix) {
-        super(arcusClientPool, prefix);
+    public QueryCacheHibernateArcusStorageAccess(HibernateArcusClientFactory hibernateArcusClientFactory, String prefix) {
+        super(hibernateArcusClientFactory, prefix);
     }
 
     @Override

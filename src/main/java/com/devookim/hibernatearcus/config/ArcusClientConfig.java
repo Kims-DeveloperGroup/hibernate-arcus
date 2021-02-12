@@ -5,6 +5,8 @@ import net.spy.memcached.ArcusClientPool;
 import net.spy.memcached.ConnectionFactoryBuilder;
 
 public class ArcusClientConfig {
+    public final boolean fallbackEnabled;
+    public final boolean initFallbackMode;
     private final int poolSize;
     private final String host;
     private final String serviceCode;
@@ -17,11 +19,11 @@ public class ArcusClientConfig {
         this.poolSize = poolSize;
     }
 
-    public ArcusClientPool getArcusClientPool() {
-        return createArcusClientPool();
-    }
-
-    private ArcusClientPool createArcusClientPool() {
+    public ArcusClientPool createArcusClientPool(ConnectionObserver connectionObserver) {
+        ConnectionFactoryBuilder cfb = new ConnectionFactoryBuilder();
+        cfb.setInitialObservers(Collections.singleton(connectionObserver));
+        cfb.setOpTimeout(Long.parseLong(properties.getOrDefault("hibernate.cache.arcus.opTimeout", "1000")));
+        cfb.setTimeoutExceptionThreshold(Integer.parseInt(properties.getOrDefault("hibernate.cache.arcus", "3")));
         return ArcusClient.createArcusClientPool(
                 host,
                 serviceCode,
