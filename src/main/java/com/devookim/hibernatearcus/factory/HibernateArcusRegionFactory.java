@@ -44,11 +44,7 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
     @Override
     protected void prepareForUse(SessionFactoryOptions settings, Map properties) throws CacheException {
 
-        ArcusClientConfig arcusClientConfig = new ArcusClientConfig(
-                properties.getOrDefault("hibernate.cache.arcus.host", "localhost:2181").toString(),
-                properties.getOrDefault("hibernate.cache.arcus.serviceCode", "").toString(),
-                Integer.parseInt(properties.getOrDefault("hibernate.cache.arcus.poolSize", 1).toString())
-        );
+        ArcusClientConfig arcusClientConfig = new ArcusClientConfig(properties);
         this.hibernateArcusClientFactory = new HibernateArcusClientFactory(arcusClientConfig);
         StrategySelector selector = settings.getServiceRegistry().getService(StrategySelector.class);
         cacheKeysFactory = selector.resolveDefaultableStrategy(CacheKeysFactory.class,
