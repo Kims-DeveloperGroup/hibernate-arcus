@@ -28,7 +28,6 @@ public class ArcusClientConfig {
         ConnectionFactoryBuilder cfb = new ConnectionFactoryBuilder();
         cfb.setMaxReconnectDelay(Long.parseLong(properties.getOrDefault("hibernate.cache.arcus.reconnectIntervalInSec", "10000")));
         cfb.setOpTimeout(Long.parseLong(properties.getOrDefault("hibernate.cache.arcus.opTimeout", "10000")));
-        cfb.setTimeoutExceptionThreshold(Integer.parseInt(properties.getOrDefault("hibernate.cache.arcus", "3")));
         return ArcusClient.createArcusClientPool(
                 host,
                 serviceCode,
