@@ -1,13 +1,11 @@
 package com.devookim.hibernatearcus.config;
 
-import net.spy.memcached.ArcusClient;
-import net.spy.memcached.ArcusClientPool;
-import net.spy.memcached.ConnectionFactoryBuilder;
-import net.spy.memcached.ConnectionObserver;
+import lombok.extern.slf4j.Slf4j;
+import net.spy.memcached.*;
 
-import java.util.Collections;
 import java.util.Map;
 
+@Slf4j
 public class ArcusClientConfig {
     public final boolean fallbackEnabled;
     public final boolean initFallbackMode;
@@ -25,10 +23,11 @@ public class ArcusClientConfig {
         this.properties = properties;
     }
 
-    public ArcusClientPool createArcusClientPool(ConnectionObserver connectionObserver) {
+    public ArcusClientPool createArcusClientPool() {
+        log.info("Creating arcus client pool");
         ConnectionFactoryBuilder cfb = new ConnectionFactoryBuilder();
-        cfb.setInitialObservers(Collections.singleton(connectionObserver));
-        cfb.setOpTimeout(Long.parseLong(properties.getOrDefault("hibernate.cache.arcus.opTimeout", "1000")));
+        cfb.setMaxReconnectDelay(Long.parseLong(properties.getOrDefault("hibernate.cache.arcus.reconnectIntervalInSec", "10000")));
+        cfb.setOpTimeout(Long.parseLong(properties.getOrDefault("hibernate.cache.arcus.opTimeout", "10000")));
         cfb.setTimeoutExceptionThreshold(Integer.parseInt(properties.getOrDefault("hibernate.cache.arcus", "3")));
         return ArcusClient.createArcusClientPool(
                 host,
