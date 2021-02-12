@@ -16,6 +16,7 @@ public class HibernateArcusClientFactory implements ConnectionObserver {
     }
 
     public void shutdown() {
+        clientPool.shutdown();
         log.info("ArcusClient shutdown");
     }
 
