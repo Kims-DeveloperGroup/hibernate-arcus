@@ -17,15 +17,19 @@ public class HibernateArcusClientFactory {
     public final boolean fallbackEnabled;
     private final ArcusClientPool clientPool;
     private final AtomicBoolean fallbackMode;
+    private final ScheduledExecutorService scheduledExecutorService;
 
     public HibernateArcusClientFactory(ArcusClientConfig clientConfig) {
         this.clientPool = clientConfig.createArcusClientPool();
         fallbackEnabled = clientConfig.fallbackEnabled;
         fallbackMode = new AtomicBoolean(clientConfig.initFallbackMode);
-        healthCheckArcusCluster();
+        scheduledExecutorService = Executors.newScheduledThreadPool(1,
+                runnable -> new Thread(runnable,"HibernateArcusClientFactoryHealthChecker"));
+        healthCheckArcusCluster(scheduledExecutorService);
     }
 
     public void shutdown() {
+        scheduledExecutorService.shutdown();
         clientPool.shutdown();
         log.info("ArcusClient shutdown");
     }
@@ -44,8 +48,7 @@ public class HibernateArcusClientFactory {
         return fallbackMode.get();
     }
 
-    public void healthCheckArcusCluster() {
-        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+    public void healthCheckArcusCluster(ScheduledExecutorService scheduledExecutorService) {
         scheduledExecutorService.scheduleWithFixedDelay(() -> {
             log.trace("ping...");
             Map<SocketAddress, Map<String, String>> stats = clientPool.getStats();
