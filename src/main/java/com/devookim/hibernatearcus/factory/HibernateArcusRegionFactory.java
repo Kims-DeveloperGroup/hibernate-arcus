@@ -73,19 +73,6 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
     }
 
     @Override
-    public long nextTimestamp() {
-        long currentTimeStamp = System.currentTimeMillis() << 12;
-        try {
-            return hibernateArcusClientFactory.nextTimeStamp(currentTimeStamp, "TIME_STAMP");
-        } catch (Exception e) {
-            if (fallback) {
-                return super.nextTimestamp();
-            }
-            throw e;
-        }
-    }
-
-    @Override
     public DomainDataRegion buildDomainDataRegion(
             DomainDataRegionConfig regionConfig,
             DomainDataRegionBuildingContext buildingContext) {

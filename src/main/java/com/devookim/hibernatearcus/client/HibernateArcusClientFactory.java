@@ -20,14 +20,6 @@ public class HibernateArcusClientFactory implements ConnectionObserver {
         log.info("ArcusClient shutdown");
     }
 
-    public Long nextTimeStamp(long currentTimeStamp, String TIMESTAMP_KEY) {
-        long timeStamp = (long) clientPool.get(TIMESTAMP_KEY);
-        if (timeStamp < currentTimeStamp) {
-            clientPool.set(TIMESTAMP_KEY, -1, currentTimeStamp);
-        }
-        return Math.max(timeStamp, currentTimeStamp);
-    }
-
     public ArcusClientPool getClient() {
         return clientPool;
     }
