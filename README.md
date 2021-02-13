@@ -16,7 +16,7 @@ Available in [MavenCentral](https://search.maven.org/artifact/com.github.kims-de
 <dependency>
   <groupId>com.github.kims-developergroup</groupId>
   <artifactId>hibernate-arcus</artifactId>
-  <version>1.0.0-RELEASE</version>
+  <version>1.1.0-RELEASE</version>
 </dependency>
 ```
 <br>
