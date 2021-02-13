@@ -11,10 +11,17 @@ _Hibernate second cache interface puts the result entities into a provided cache
 ### Quick Tutorial
 
 #### 1. Add the hibernate-arcus
-_MavenCentral Deployment in progress_ <br>
-Request jira ticket: https://issues.sonatype.org/browse/OSSRH-64363
+Available in [MavenCentral](https://search.maven.org/artifact/com.github.kims-developergroup/hibernate-arcus/1.1.0-RELEASE/jar)
+```
+<dependency>
+  <groupId>com.github.kims-developergroup</groupId>
+  <artifactId>hibernate-arcus</artifactId>
+  <version>1.0.0-RELEASE</version>
+</dependency>
+```
 <br>
 <br>
+
 #### 2. Set the properties below
 
 if you use spring jpa
@@ -25,9 +32,9 @@ spring.jpa.properties.hibernate.cache.region.factory_class=com.devookim.hibernat
 spring.jpa.properties.hibernate.cache.use_second_level_cache=true
 spring.jpa.properties.hibernate.cache.use_query_cache=true
 
-spring.jpa.properties.hibernate.cache.arcus.serviceCode=${arcus_service_code}
-spring.jpa.properties.hibernate.cache.arcus.poolSize=${arcus_client_pool_size}
-spring.jpa.properties.hibernate.cache.arcus.host=${hostName}:{$port}
+spring.jpa.properties.hibernate.cache.arcus.serviceCode=${arcus_service_code}  # required
+spring.jpa.properties.hibernate.cache.arcus.poolSize=${arcus_client_pool_size} # default poolSize=1
+spring.jpa.properties.hibernate.cache.arcus.host=${hostName}:{$port}           # required
 ```
 
 or if you use only hibernate
@@ -38,9 +45,9 @@ hibernate.cache.region.factory_class=com.devookim.hibernatearcus.factory.Hiberna
 hibernate.cache.use_second_level_cache=true
 hibernate.cache.use_query_cache=true
 
-hibernate.cache.arcus.serviceCode=${arcus_service_code}
-hibernate.cache.arcus.poolSize=${arcus_client_pool_size}
-hibernate.cache.arcus.host=${hostName}:{$port}
+hibernate.cache.arcus.serviceCode=${arcus_service_code}  # required
+hibernate.cache.arcus.poolSize=${arcus_client_pool_size} # default poolSize=1
+hibernate.cache.arcus.host=${hostName}:{$port}           # required
 ```
 In case that query cache is not required, and set `hibernate.cache.use_query_cache=false` <br>
 However, `hibernate.cache.use_query_cache=true` is necessary set with `hibernate.cache.use_second_level_cache=true`
@@ -95,6 +102,14 @@ gradlew clean test --info
 ```
 ---
 
+### Configuratio Properties
+```
+hibernate.cache.arcus.fallbackEnabled  (default: true) // whether to use fallback mode or not.
+hibernate.cache.arcus.initFallbackMode (default: false) // Initial value of fallback mode
+hibernate.cache.arcus.reconnectIntervalInSec (default: 10000) unit mills // ArcusClient retry connection interval in seconds
+hibernate.cache.arcus.opTimeout (default 10000) unit mills // arcus client cache operation timeout.
+hibernate.cache.arcus.healthCheckIntervalInSec(default 10) unit sec // interval time of health check
+```
 
 ### Contribution
 _Always welcome all shapes of your contribution and use-cases_
