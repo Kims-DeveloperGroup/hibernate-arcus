@@ -9,6 +9,7 @@ import java.util.Map;
 public class ArcusClientConfig {
     public final boolean fallbackEnabled;
     public final boolean initFallbackMode;
+    public final int healthCheckIntervalInSec;
     private final int poolSize;
     private final Map<String, String> properties;
     private final String host;
@@ -20,6 +21,7 @@ public class ArcusClientConfig {
         this.poolSize = Integer.parseInt(properties.getOrDefault("hibernate.cache.arcus.poolSize", "1"));
         this.fallbackEnabled = Boolean.parseBoolean(properties.getOrDefault("hibernate.cache.arcus.fallbackEnabled", "true"));
         this.initFallbackMode = Boolean.parseBoolean(properties.getOrDefault("hibernate.cache.arcus.initFallbackMode", "false"));
+        this.healthCheckIntervalInSec = Integer.parseInt(properties.getOrDefault("hibernate.cache.arcus.healthCheckIntervalInSec", "10"));
         this.properties = properties;
     }
 

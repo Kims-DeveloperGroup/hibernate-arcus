@@ -18,11 +18,13 @@ public class HibernateArcusClientFactory {
     private final ArcusClientPool clientPool;
     private final AtomicBoolean fallbackMode;
     private final ScheduledExecutorService scheduledExecutorService;
+    private final int healthCheckIntervalInSec;
 
     public HibernateArcusClientFactory(ArcusClientConfig clientConfig) {
         this.clientPool = clientConfig.createArcusClientPool();
         fallbackEnabled = clientConfig.fallbackEnabled;
         fallbackMode = new AtomicBoolean(clientConfig.initFallbackMode);
+        healthCheckIntervalInSec = clientConfig.healthCheckIntervalInSec;
         scheduledExecutorService = Executors.newScheduledThreadPool(1,
                 runnable -> new Thread(runnable,"HibernateArcusClientFactoryHealthChecker"));
         healthCheckArcusCluster(scheduledExecutorService);
@@ -69,6 +71,6 @@ public class HibernateArcusClientFactory {
             if (fallbackEnabled) {
                 setFallbackMode(true);
             }
-        }, 10, 10, TimeUnit.SECONDS);
+        }, healthCheckIntervalInSec, healthCheckIntervalInSec, TimeUnit.SECONDS);
     }
 }
