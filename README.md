@@ -90,7 +90,7 @@ You may want to cache queries, then attach @QueryHint
 <br><br>
 
 ### How to run tests
-1. Run arcus cache locally (_docker image is ready. https://hub.docker.com/repository/docker/devookim/arcus-memcached_) <br>
+1. Run arcus cache locally _(DockerImage is ready [here](https://hub.docker.com/repository/docker/devookim/arcus-memcached))_ <br>
 
 Just run the docker-compose in the project root
 ```
