@@ -1,6 +1,6 @@
 package com.devookim.hibernatearcus.storage;
 
-import net.spy.memcached.ArcusClientPool;
+import com.devookim.hibernatearcus.client.HibernateArcusClientFactory;
 import org.hibernate.cache.CacheException;
 import org.hibernate.cache.spi.support.DomainDataStorageAccess;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
@@ -8,16 +8,13 @@ import org.slf4j.Logger;
 
 public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(HibernateArcusStorageAccess.class);
-    private ArcusClientPool cacheClientPool;
+    private HibernateArcusClientFactory arcusClientFactory;
     protected final String CACHE_REGION;
-    boolean fallback;
-    volatile boolean fallbackMode;
 
-    public HibernateArcusStorageAccess(ArcusClientPool arcusClientPool, String prefix) {
+    public HibernateArcusStorageAccess(HibernateArcusClientFactory arcusClientFactory, String prefix) {
         super();
-        this.cacheClientPool = arcusClientPool;
+        this.arcusClientFactory = arcusClientFactory;
         this.CACHE_REGION = prefix;
-        fallback = false;
     }
 
     protected String generateKey(Object key) {
@@ -26,14 +23,19 @@ public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
 
     @Override
     public Object getFromCache(Object key, SharedSessionContractImplementor session) {
+        if (arcusClientFactory.isFallbackModeOn()) {
+            log.info("Fallback is on key: {}", key);
+            return null;
+        }
+
         String generatedKey = generateKey(key);
         try {
-            Object o = cacheClientPool.get(generatedKey);
+            Object o = arcusClientFactory.getClientPool().get(generatedKey);
             log.trace("get key:{} value: {}", generatedKey, o);
             return o;
         } catch (Exception e) {
-            log.error("key: {}", generatedKey, e);
-            if (fallback) {
+            log.error("fallbackEnabled: {} key: {} errorMsg: {}", arcusClientFactory.fallbackEnabled, generatedKey, e.getMessage());
+            if (arcusClientFactory.fallbackEnabled) {
                 return null;
             }
             throw new CacheException(e);
@@ -42,13 +44,18 @@ public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
 
     @Override
     public void putIntoCache(Object key, Object value, SharedSessionContractImplementor session) {
+        if (arcusClientFactory.isFallbackModeOn()) {
+            log.info("Fallback is on key: {}", key);
+            return;
+        }
+
         String generatedKey = generateKey(key);
         try {
-            cacheClientPool.set(generatedKey, 0, value).get();
+            arcusClientFactory.getClientPool().set(generatedKey, 0, value).get();
             log.trace("put key:{} value: {}", generatedKey, value);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            if (fallback) {
+            log.error("fallbackEnabled: {} key: {} errorMsg: {}", arcusClientFactory.fallbackEnabled, generatedKey, e.getMessage());
+            if (arcusClientFactory.fallbackEnabled) {
                 return;
             }
             throw new CacheException(e);
@@ -57,17 +64,19 @@ public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
 
     @Override
     public boolean contains(Object key) {
-        if (fallbackMode) {
+        if (arcusClientFactory.isFallbackModeOn()) {
+            log.info("Fallback is on key: {}", key);
             return false;
         }
+
         String generatedKey = generateKey(key);
         try {
-            Object result = cacheClientPool.get(generatedKey);
+            Object result = arcusClientFactory.getClientPool().get(generatedKey);
             log.info("containKey for {} contains: {}", generatedKey, result != null);
             return result != null;
         } catch (Exception e) {
-            log.error("key: {}", generatedKey, e);
-            if (fallback) {
+            log.error("fallbackEnabled: {} key: {} errorMsg: {}", arcusClientFactory.fallbackEnabled, generatedKey, e.getMessage());
+            if (arcusClientFactory.fallbackEnabled) {
                 return false;
             }
             throw new CacheException(e);
@@ -76,14 +85,15 @@ public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
 
     @Override
     public void evictData() {
-        if (fallbackMode) {
+        if (arcusClientFactory.isFallbackModeOn()) {
+            log.info("Fallback is on");
             return;
         }
         try {
             log.info("cacheEvict for {}", CACHE_REGION);
         } catch (Exception e) {
-            log.error("key: {}", CACHE_REGION, e);
-            if (fallback) {
+            log.error("fallbackEnabled: {} region: {} errorMsg: {}", arcusClientFactory.fallbackEnabled, CACHE_REGION, e.getMessage());
+            if (arcusClientFactory.fallbackEnabled) {
                 return;
             }
             throw new CacheException(e);
@@ -92,16 +102,17 @@ public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
 
     @Override
     public void evictData(Object key) {
-        if (fallbackMode) {
+        if (arcusClientFactory.isFallbackModeOn()) {
+            log.info("Fallback is on key: {}", key);
             return;
         }
         String generatedKey = generateKey(key);
         try {
             log.info("cacheEvict for {}", generatedKey);
-            cacheClientPool.delete(generatedKey).get();
+            arcusClientFactory.getClientPool().delete(generatedKey).get();
         } catch (Exception e) {
-            log.error("key: {}", generatedKey, e);
-            if (fallback) {
+            log.error("fallbackEnabled: {} key: {} errorMsg: {}", arcusClientFactory.fallbackEnabled, generatedKey, e.getMessage());
+            if (arcusClientFactory.fallbackEnabled) {
                 return;
             }
             throw new CacheException(e);
@@ -111,7 +122,8 @@ public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
     @Override
     public void release() {
         try {
-            this.cacheClientPool = null;
+            log.debug("release region:{}", CACHE_REGION);
+            this.arcusClientFactory = null;
         } catch (Exception e) {
             throw new CacheException(e);
         }

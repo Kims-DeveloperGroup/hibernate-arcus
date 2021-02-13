@@ -30,11 +30,10 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
     
     private HibernateArcusClientFactory hibernateArcusClientFactory;
     private CacheKeysFactory cacheKeysFactory;
-    protected boolean fallback;
 
     @PostConstruct
     public void postConstruct() {
-        log.debug("HibernateArcusRegionFactory is initialized");
+        log.info("HibernateArcusRegionFactory is initialized");
     }
 
     @Override
@@ -45,13 +44,8 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
     @Override
     protected void prepareForUse(SessionFactoryOptions settings, Map properties) throws CacheException {
 
-        ArcusClientConfig arcusClientConfig = new ArcusClientConfig(
-                properties.getOrDefault("hibernate.cache.arcus.host", "localhost:2181").toString(),
-                properties.getOrDefault("hibernate.cache.arcus.serviceCode", "").toString(),
-                Integer.parseInt(properties.getOrDefault("hibernate.cache.arcus.poolSize", 1).toString())
-        );
+        ArcusClientConfig arcusClientConfig = new ArcusClientConfig(properties);
         this.hibernateArcusClientFactory = new HibernateArcusClientFactory(arcusClientConfig);
-        fallback = true;
         StrategySelector selector = settings.getServiceRegistry().getService(StrategySelector.class);
         cacheKeysFactory = selector.resolveDefaultableStrategy(CacheKeysFactory.class,
                 properties.get(Environment.CACHE_KEYS_FACTORY), new HibernateArcusCacheKeysFactory());
@@ -73,19 +67,6 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
     }
 
     @Override
-    public long nextTimestamp() {
-        long currentTimeStamp = System.currentTimeMillis() << 12;
-        try {
-            return hibernateArcusClientFactory.nextTimeStamp(currentTimeStamp, "TIME_STAMP");
-        } catch (Exception e) {
-            if (fallback) {
-                return super.nextTimestamp();
-            }
-            throw e;
-        }
-    }
-
-    @Override
     public DomainDataRegion buildDomainDataRegion(
             DomainDataRegionConfig regionConfig,
             DomainDataRegionBuildingContext buildingContext) {
@@ -101,8 +82,7 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
 
     @Override
     protected DomainDataStorageAccess createDomainDataStorageAccess(DomainDataRegionConfig regionConfig, DomainDataRegionBuildingContext buildingContext) {
-        ArcusClientPool cacheClientPool = getCache(qualify(regionConfig.getRegionName()));
-        return new DomainDataHibernateArcusStorageAccess(cacheClientPool,  qualify(regionConfig.getRegionName()));
+        return new DomainDataHibernateArcusStorageAccess(getClientFactory(qualify(regionConfig.getRegionName())),  qualify(regionConfig.getRegionName()));
     }
 
     @Override
@@ -112,18 +92,16 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
 
     @Override
     protected StorageAccess createQueryResultsRegionStorageAccess(String regionName, SessionFactoryImplementor sessionFactory) {
-        ArcusClientPool cacheClientPool = getCache(qualify(regionName));
-        return new QueryCacheHibernateArcusStorageAccess(cacheClientPool, qualify(regionName));
+        return new QueryCacheHibernateArcusStorageAccess(getClientFactory(qualify(regionName)), qualify(regionName));
     }
 
     @Override
     protected StorageAccess createTimestampsRegionStorageAccess(String regionName, SessionFactoryImplementor sessionFactory) {
-        ArcusClientPool cacheClientPool = getCache(qualify(regionName));
-        return new HibernateArcusStorageAccess(cacheClientPool, qualify(regionName));
+        return new HibernateArcusStorageAccess(getClientFactory(qualify(regionName)), qualify(regionName));
     }
 
-    protected ArcusClientPool getCache(String regionName) {
+    protected HibernateArcusClientFactory getClientFactory(String regionName) {
         log.debug("getCache region: {}", regionName);
-        return hibernateArcusClientFactory.getClient();
+        return hibernateArcusClientFactory;
     }
 }

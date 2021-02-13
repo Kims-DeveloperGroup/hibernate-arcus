@@ -1,31 +1,39 @@
 package com.devookim.hibernatearcus.config;
 
-import net.spy.memcached.ArcusClient;
-import net.spy.memcached.ArcusClientPool;
-import net.spy.memcached.ConnectionFactoryBuilder;
+import lombok.extern.slf4j.Slf4j;
+import net.spy.memcached.*;
 
+import java.util.Map;
+
+@Slf4j
 public class ArcusClientConfig {
+    public final boolean fallbackEnabled;
+    public final boolean initFallbackMode;
+    public final int healthCheckIntervalInSec;
     private final int poolSize;
+    private final Map<String, String> properties;
     private final String host;
     private final String serviceCode;
 
-    public ArcusClientConfig(String host,
-                             String serviceCode,
-                             int poolSize) {
-        this.host = host;
-        this.serviceCode = serviceCode;
-        this.poolSize = poolSize;
+    public ArcusClientConfig(Map<String, String> properties) {
+        this.host = properties.getOrDefault("hibernate.cache.arcus.host", "localhost:2181");
+        this.serviceCode = properties.getOrDefault("hibernate.cache.arcus.serviceCode", "");
+        this.poolSize = Integer.parseInt(properties.getOrDefault("hibernate.cache.arcus.poolSize", "1"));
+        this.fallbackEnabled = Boolean.parseBoolean(properties.getOrDefault("hibernate.cache.arcus.fallbackEnabled", "true"));
+        this.initFallbackMode = Boolean.parseBoolean(properties.getOrDefault("hibernate.cache.arcus.initFallbackMode", "false"));
+        this.healthCheckIntervalInSec = Integer.parseInt(properties.getOrDefault("hibernate.cache.arcus.healthCheckIntervalInSec", "10"));
+        this.properties = properties;
     }
 
-    public ArcusClientPool getArcusClientPool() {
-        return createArcusClientPool();
-    }
-
-    private ArcusClientPool createArcusClientPool() {
+    public ArcusClientPool createArcusClientPool() {
+        log.info("Creating arcus client pool");
+        ConnectionFactoryBuilder cfb = new ConnectionFactoryBuilder();
+        cfb.setMaxReconnectDelay(Long.parseLong(properties.getOrDefault("hibernate.cache.arcus.reconnectIntervalInSec", "10000")));
+        cfb.setOpTimeout(Long.parseLong(properties.getOrDefault("hibernate.cache.arcus.opTimeout", "10000")));
         return ArcusClient.createArcusClientPool(
                 host,
                 serviceCode,
-                new ConnectionFactoryBuilder(),
+                cfb,
                 poolSize
         );
     }
