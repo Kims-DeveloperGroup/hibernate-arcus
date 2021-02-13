@@ -51,10 +51,13 @@ public class HibernateArcusClientFactory {
     }
 
     public void healthCheckArcusCluster(ScheduledExecutorService scheduledExecutorService) {
+        if (!fallbackEnabled) {
+            return;
+        }
         scheduledExecutorService.scheduleWithFixedDelay(() -> {
             log.trace("ping...");
             Map<SocketAddress, Map<String, String>> stats = clientPool.getStats();
-            if(stats.size() == 0 && fallbackEnabled) {
+            if(stats.size() == 0) {
                 setFallbackMode(true);
                 return;
             }
@@ -66,10 +69,6 @@ public class HibernateArcusClientFactory {
                     setFallbackMode(false);
                     return;
                 }
-            }
-
-            if (fallbackEnabled) {
-                setFallbackMode(true);
             }
         }, healthCheckIntervalInSec, healthCheckIntervalInSec, TimeUnit.SECONDS);
     }
