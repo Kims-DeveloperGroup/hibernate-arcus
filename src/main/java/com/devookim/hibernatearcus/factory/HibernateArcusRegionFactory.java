@@ -2,6 +2,7 @@ package com.devookim.hibernatearcus.factory;
 
 import com.devookim.hibernatearcus.client.HibernateArcusClientFactory;
 import com.devookim.hibernatearcus.config.ArcusClientConfig;
+import com.devookim.hibernatearcus.config.HibernateArcusStorageConfig;
 import com.devookim.hibernatearcus.storage.DomainDataHibernateArcusStorageAccess;
 import com.devookim.hibernatearcus.storage.HibernateArcusStorageAccess;
 import com.devookim.hibernatearcus.storage.QueryCacheHibernateArcusStorageAccess;
@@ -30,6 +31,7 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
     
     private HibernateArcusClientFactory hibernateArcusClientFactory;
     private CacheKeysFactory cacheKeysFactory;
+    private HibernateArcusStorageConfig storageConfig;
 
     @PostConstruct
     public void postConstruct() {
@@ -45,6 +47,7 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
     protected void prepareForUse(SessionFactoryOptions settings, Map properties) throws CacheException {
 
         ArcusClientConfig arcusClientConfig = new ArcusClientConfig(properties);
+        storageConfig = new HibernateArcusStorageConfig(properties);
         this.hibernateArcusClientFactory = new HibernateArcusClientFactory(arcusClientConfig);
         StrategySelector selector = settings.getServiceRegistry().getService(StrategySelector.class);
         cacheKeysFactory = selector.resolveDefaultableStrategy(CacheKeysFactory.class,
@@ -82,7 +85,7 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
 
     @Override
     protected DomainDataStorageAccess createDomainDataStorageAccess(DomainDataRegionConfig regionConfig, DomainDataRegionBuildingContext buildingContext) {
-        return new DomainDataHibernateArcusStorageAccess(getClientFactory(qualify(regionConfig.getRegionName())),  qualify(regionConfig.getRegionName()));
+        return new DomainDataHibernateArcusStorageAccess(getClientFactory(qualify(regionConfig.getRegionName())),  qualify(regionConfig.getRegionName()), storageConfig);
     }
 
     @Override

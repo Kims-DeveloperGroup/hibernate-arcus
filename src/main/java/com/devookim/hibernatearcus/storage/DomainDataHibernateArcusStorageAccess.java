@@ -1,13 +1,14 @@
 package com.devookim.hibernatearcus.storage;
 
 import com.devookim.hibernatearcus.client.HibernateArcusClientFactory;
+import com.devookim.hibernatearcus.config.HibernateArcusStorageConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 
 @Slf4j
 public class DomainDataHibernateArcusStorageAccess extends HibernateArcusStorageAccess {
-    public DomainDataHibernateArcusStorageAccess(HibernateArcusClientFactory arcusClientFactory, String regionName) {
+    public DomainDataHibernateArcusStorageAccess(HibernateArcusClientFactory arcusClientFactory, String regionName, HibernateArcusStorageConfig config) {
         super(arcusClientFactory, regionName);
     }
 
