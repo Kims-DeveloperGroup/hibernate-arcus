@@ -2,17 +2,24 @@ package com.devookim.hibernatearcus.storage;
 
 import com.devookim.hibernatearcus.client.HibernateArcusClientFactory;
 import com.devookim.hibernatearcus.config.HibernateArcusStorageConfig;
+import com.devookim.hibernatearcus.factory.HibernateArcusCacheKeysFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 
+import java.util.HashMap;
+
 @Slf4j
 public class DomainDataHibernateArcusStorageAccess extends HibernateArcusStorageAccess {
+    private static final HashMap<String, DomainDataHibernateArcusStorageAccess> domainDataStorageAccesses = new HashMap<>();
     private final HibernateArcusStorageConfig storageAccessConfig;
+    public final String entityClassName;
 
-    public DomainDataHibernateArcusStorageAccess(HibernateArcusClientFactory arcusClientFactory, String regionName, HibernateArcusStorageConfig storageAccessConfig) {
+    public DomainDataHibernateArcusStorageAccess(HibernateArcusClientFactory arcusClientFactory, String regionName, HibernateArcusStorageConfig storageAccessConfig, String entityClassName) {
         super(arcusClientFactory, regionName);
         this.storageAccessConfig = storageAccessConfig;
+        this.entityClassName = entityClassName;
+        domainDataStorageAccesses.put(regionName, this);
     }
 
     @Override

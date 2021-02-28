@@ -7,7 +7,6 @@ import com.devookim.hibernatearcus.storage.DomainDataHibernateArcusStorageAccess
 import com.devookim.hibernatearcus.storage.HibernateArcusStorageAccess;
 import com.devookim.hibernatearcus.storage.QueryCacheHibernateArcusStorageAccess;
 import lombok.extern.slf4j.Slf4j;
-import net.spy.memcached.ArcusClientPool;
 import org.hibernate.boot.registry.selector.spi.StrategySelector;
 import org.hibernate.boot.spi.SessionFactoryOptions;
 import org.hibernate.cache.CacheException;
@@ -85,7 +84,10 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
 
     @Override
     protected DomainDataStorageAccess createDomainDataStorageAccess(DomainDataRegionConfig regionConfig, DomainDataRegionBuildingContext buildingContext) {
-        return new DomainDataHibernateArcusStorageAccess(getClientFactory(qualify(regionConfig.getRegionName())),  qualify(regionConfig.getRegionName()), storageConfig);
+        return new DomainDataHibernateArcusStorageAccess(getClientFactory(qualify(regionConfig.getRegionName())),
+                qualify(regionConfig.getRegionName()),
+                storageConfig,
+                regionConfig.getEntityCaching().get(0).getNavigableRole().getNavigableName());
     }
 
     @Override
