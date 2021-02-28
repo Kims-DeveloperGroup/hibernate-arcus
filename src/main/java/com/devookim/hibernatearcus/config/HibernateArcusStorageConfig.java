@@ -4,9 +4,9 @@ import java.util.Map;
 
 public class HibernateArcusStorageConfig {
 
-    public final boolean cacheEvictOnCachePut;
+    public final boolean enableCacheEvictOnCachePut;
 
     public HibernateArcusStorageConfig(Map<String, String> properties) {
-        cacheEvictOnCachePut = Boolean.parseBoolean(properties.getOrDefault("hibernate.cache.arcus.cacheEvictOnCachePut", "false"));
+        enableCacheEvictOnCachePut = Boolean.parseBoolean(properties.getOrDefault("hibernate.cache.arcus.enableCacheEvictOnCachePut", "false"));
     }
 }
