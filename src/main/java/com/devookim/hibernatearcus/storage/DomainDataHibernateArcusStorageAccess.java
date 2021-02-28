@@ -8,8 +8,11 @@ import org.hibernate.engine.spi.SharedSessionContractImplementor;
 
 @Slf4j
 public class DomainDataHibernateArcusStorageAccess extends HibernateArcusStorageAccess {
-    public DomainDataHibernateArcusStorageAccess(HibernateArcusClientFactory arcusClientFactory, String regionName, HibernateArcusStorageConfig config) {
+    private final HibernateArcusStorageConfig storageAccessConfig;
+
+    public DomainDataHibernateArcusStorageAccess(HibernateArcusClientFactory arcusClientFactory, String regionName, HibernateArcusStorageConfig storageAccessConfig) {
         super(arcusClientFactory, regionName);
+        this.storageAccessConfig = storageAccessConfig;
     }
 
     @Override
@@ -27,11 +30,19 @@ public class DomainDataHibernateArcusStorageAccess extends HibernateArcusStorage
 
     @Override
     public void putIntoCache(Object key, Object value, SharedSessionContractImplementor session) {
+        if (storageAccessConfig.enableCacheEvictOnCachePut) {
+            evictData(key);
+        }
         super.putIntoCache(key, value, session);
         if (value instanceof AbstractReadWriteAccess.SoftLockImpl) {
             log.trace("cacheLock key: {} lock: {}", generateKey(key), value);
         } else {
             log.debug("cachePut key: {} value: {}", generateKey(key), value);
         }
+    }
+
+    @Override
+    public void evictData(Object key) {
+        super.evictData(key);
     }
 }
