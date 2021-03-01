@@ -18,7 +18,7 @@ import java.io.Serializable;
 
 import static org.junit.Assert.assertEquals;
 
-public class RegionGroupTest extends BaseCoreFunctionalTestCase {
+public class TransactionAccessDomainDataRegionGroupTest extends BaseCoreFunctionalTestCase {
 
     private final String collectionCacheRegionName = "hibernate.CollectionCacheTest$ParentDomainData.children";
 
@@ -64,13 +64,59 @@ public class RegionGroupTest extends BaseCoreFunctionalTestCase {
         s.close();
 
         assertEquals(1, regionOneStat.getPutCount());
+        assertEquals(0, regionOneStat.getHitCount());
         assertEquals(1, regionTwoStat.getPutCount());
+        System.out.println("============================");
 
         s = openSession();
         s.beginTransaction();
-        s.delete(regionOne);
+        DomainRegionOne domainRegionOneFromCache = s.get(DomainRegionOne.class, id);
+        s.delete(domainRegionOneFromCache);
         s.getTransaction().commit();
         s.close();
+        assertEquals(1, regionOneStat.getHitCount());
+        System.out.println("============================");
+
+        assertEquals(0, regionTwoStat.getMissCount());
+        s = openSession();
+        s.beginTransaction();
+        s.get(DomainRegionTwo.class, id);
+        s.getTransaction().commit();
+        s.close();
+        assertEquals(1, regionTwoStat.getMissCount());
+    }
+
+    @Test
+    public void testCacheEvictOnCachePut_whenADomainRegionOneEntityIsUpdated() {
+        CacheRegionStatistics regionOneStat = sessionFactory()
+                .getStatistics().getDomainDataRegionStatistics(DomainRegionOne.regionName);
+        CacheRegionStatistics regionTwoStat = sessionFactory()
+                .getStatistics().getDomainDataRegionStatistics(DomainRegionTwo.regionName);
+        final long id = System.currentTimeMillis();
+        Session s = openSession();
+        s.beginTransaction();
+        DomainRegionOne regionOne = new DomainRegionOne(id);
+        DomainRegionTwo regionTwo = new DomainRegionTwo(id);
+        s.save(regionOne);
+        s.save(regionTwo);
+        s.flush();
+        s.getTransaction().commit();
+        s.close();
+
+        assertEquals(1, regionOneStat.getPutCount());
+        assertEquals(1, regionTwoStat.getPutCount());
+        System.out.println("============================");
+
+        s = openSession();
+        s.beginTransaction();
+        DomainRegionOne domainRegionOneFromCache = s.get(DomainRegionOne.class, id);
+        domainRegionOneFromCache.value = "updated-value";
+        s.update(domainRegionOneFromCache);
+        s.getTransaction().commit();
+        s.close();
+        assertEquals(1, regionOneStat.getHitCount());
+
+        System.out.println("============================");
 
         assertEquals(0, regionTwoStat.getMissCount());
         s = openSession();
@@ -83,7 +129,7 @@ public class RegionGroupTest extends BaseCoreFunctionalTestCase {
 
     @Entity
     @NoArgsConstructor
-    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = DomainRegionOne.regionName)
+    @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL, region = DomainRegionOne.regionName)
     public static class DomainRegionOne implements Serializable {
         public static final String regionName = "DomainRegionOne";
 
@@ -93,11 +139,13 @@ public class RegionGroupTest extends BaseCoreFunctionalTestCase {
         public DomainRegionOne(Long id) {
             this.id = id;
         }
+
+        public String value = "";
     }
 
     @Entity
     @NoArgsConstructor
-    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = DomainRegionTwo.regionName)
+    @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL, region = DomainRegionTwo.regionName)
     public static class DomainRegionTwo implements Serializable {
         public static final String regionName = "DomainRegionTwo";
 
