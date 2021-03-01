@@ -87,7 +87,7 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
         return new DomainDataHibernateArcusStorageAccess(getClientFactory(qualify(regionConfig.getRegionName())),
                 qualify(regionConfig.getRegionName()),
                 storageConfig,
-                regionConfig.getEntityCaching().get(0).getNavigableRole().getNavigableName());
+                regionConfig);
     }
 
     @Override

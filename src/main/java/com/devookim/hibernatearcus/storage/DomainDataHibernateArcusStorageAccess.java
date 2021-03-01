@@ -4,6 +4,8 @@ import com.devookim.hibernatearcus.client.HibernateArcusClientFactory;
 import com.devookim.hibernatearcus.config.HibernateArcusStorageConfig;
 import com.devookim.hibernatearcus.factory.HibernateArcusCacheKeysFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.cache.cfg.spi.DomainDataRegionConfig;
+import org.hibernate.cache.spi.access.AccessType;
 import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 
@@ -14,11 +16,18 @@ public class DomainDataHibernateArcusStorageAccess extends HibernateArcusStorage
     private static final HashMap<String, DomainDataHibernateArcusStorageAccess> domainDataStorageAccesses = new HashMap<>();
     private final HibernateArcusStorageConfig storageAccessConfig;
     public final String entityClassName;
+    private final boolean isEntityCachingStorage;
+    private final AccessType accessType;
 
-    public DomainDataHibernateArcusStorageAccess(HibernateArcusClientFactory arcusClientFactory, String regionName, HibernateArcusStorageConfig storageAccessConfig, String entityClassName) {
+    public DomainDataHibernateArcusStorageAccess(HibernateArcusClientFactory arcusClientFactory,
+                                                 String regionName,
+                                                 HibernateArcusStorageConfig storageAccessConfig,
+                                                 DomainDataRegionConfig regionConfig) {
         super(arcusClientFactory, regionName);
         this.storageAccessConfig = storageAccessConfig;
-        this.entityClassName = entityClassName;
+        isEntityCachingStorage = regionConfig.getEntityCaching().size() > 0;
+        this.entityClassName = isEntityCachingStorage ? regionConfig.getEntityCaching().get(0).getNavigableRole().getNavigableName() : "";
+        this.accessType = isEntityCachingStorage ? regionConfig.getEntityCaching().get(0).getAccessType() : null;
         domainDataStorageAccesses.put(regionName, this);
     }
 
@@ -37,7 +46,9 @@ public class DomainDataHibernateArcusStorageAccess extends HibernateArcusStorage
 
     @Override
     public void putIntoCache(Object key, Object value, SharedSessionContractImplementor session) {
-        if (storageAccessConfig.enableCacheEvictOnCachePut) {
+        if (storageAccessConfig.enableCacheEvictOnCachePut &&
+                ((accessType == AccessType.READ_WRITE && value instanceof AbstractReadWriteAccess.SoftLockImpl)) || (accessType != AccessType.READ_WRITE && contains(key))) {
+            log.debug("enableCacheEvictOnCachePut enabled. key: {}", key);
             evictData(key);
         }
         super.putIntoCache(key, value, session);
@@ -50,6 +61,21 @@ public class DomainDataHibernateArcusStorageAccess extends HibernateArcusStorage
 
     @Override
     public void evictData(Object key) {
-        super.evictData(key);
+        if (storageAccessConfig.regionGroupOnCacheEvict.contains(super.CACHE_REGION) && storageAccessConfig.enableCacheEvictOnCachePut) {
+            String id = key.toString().split("#")[1];
+            log.debug("regionGroupOnCacheEvict contains region: {}, id: {}", CACHE_REGION, id);
+            domainDataStorageAccesses.forEach((s, storageAccess) -> {
+                storageAccess.evictDataOnRegionGroupCacheEvict(new HibernateArcusCacheKeysFactory.EntityKey(storageAccess.entityClassName, id));
+            });
+        } else {
+            super.evictData(key);
+        }
+    }
+
+    public void evictDataOnRegionGroupCacheEvict(Object key) {
+        if (storageAccessConfig.regionGroupOnCacheEvict.contains(super.CACHE_REGION)) {
+            log.debug("cacheEvict {} by regionGroupOnCacheEvict", key);
+            super.evictData(key);
+        }
     }
 }
