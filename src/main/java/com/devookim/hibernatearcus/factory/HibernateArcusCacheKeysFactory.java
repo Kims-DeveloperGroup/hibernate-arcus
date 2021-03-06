@@ -31,7 +31,7 @@ public class HibernateArcusCacheKeysFactory extends DefaultCacheKeysFactory {
         }
     }
 
-    private static class EntityKey implements Serializable {
+    public static class EntityKey implements Serializable {
         private final String entityName;
         private final Object id;
 

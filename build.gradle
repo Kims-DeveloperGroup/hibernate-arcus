@@ -25,6 +25,8 @@ dependencies {
     testCompile group: 'org.hibernate', name: 'hibernate-testing', version: '5.4.27.Final'
     testCompile group: 'org.assertj', name: 'assertj-core', version: '3.18.1'
     testCompile group: 'com.h2database', name: 'h2', version: '1.4.200'
+
+    implementation group: 'com.google.guava', name: 'guava', version: '30.1-jre'
 }
 tasks.test {
     useJUnit()
