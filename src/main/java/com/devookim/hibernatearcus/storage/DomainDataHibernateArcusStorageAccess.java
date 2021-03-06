@@ -56,12 +56,9 @@ public class DomainDataHibernateArcusStorageAccess extends HibernateArcusStorage
 
     @Override
     public void putIntoCache(Object key, Object value, SharedSessionContractImplementor session) {
-        if (storageAccessConfig.enableCacheEvictOnCachePut &&
-                (accessType == AccessType.READ_WRITE && value instanceof AbstractReadWriteAccess.SoftLockImpl && readWriteAccessLocks.getIfPresent(value) == null)
-                || (accessType != AccessType.READ_WRITE && contains(key))) {
-            if (accessType == AccessType.READ_WRITE) {
-                readWriteAccessLocks.put((AbstractReadWriteAccess.SoftLockImpl) value, key);
-            }
+        if (accessType != AccessType.READ_WRITE
+                && storageAccessConfig.enableCacheEvictOnCachePut
+                && contains(key)) {
             log.debug("enableCacheEvictOnCachePut enabled. key: {}", key);
             evictData(key);
         }

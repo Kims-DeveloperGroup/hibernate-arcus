@@ -6,6 +6,7 @@ import com.devookim.hibernatearcus.config.HibernateArcusStorageConfig;
 import com.devookim.hibernatearcus.storage.DomainDataHibernateArcusStorageAccess;
 import com.devookim.hibernatearcus.storage.HibernateArcusStorageAccess;
 import com.devookim.hibernatearcus.storage.QueryCacheHibernateArcusStorageAccess;
+import com.devookim.hibernatearcus.storage.ReadWriteAccessDomainDataStorageAccess;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.boot.registry.selector.spi.StrategySelector;
 import org.hibernate.boot.spi.SessionFactoryOptions;
@@ -84,6 +85,12 @@ public class HibernateArcusRegionFactory extends RegionFactoryTemplate {
 
     @Override
     protected DomainDataStorageAccess createDomainDataStorageAccess(DomainDataRegionConfig regionConfig, DomainDataRegionBuildingContext buildingContext) {
+        if (regionConfig.getEntityCaching().size() > 0 && regionConfig.getEntityCaching().get(0).getAccessType().equals(AccessType.READ_WRITE)) {
+            return new ReadWriteAccessDomainDataStorageAccess(getClientFactory(qualify(regionConfig.getRegionName())),
+                    qualify(regionConfig.getRegionName()),
+                    storageConfig,
+                    regionConfig);
+        }
         return new DomainDataHibernateArcusStorageAccess(getClientFactory(qualify(regionConfig.getRegionName())),
                 qualify(regionConfig.getRegionName()),
                 storageConfig,
