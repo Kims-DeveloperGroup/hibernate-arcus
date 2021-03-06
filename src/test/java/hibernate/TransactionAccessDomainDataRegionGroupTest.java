@@ -47,7 +47,7 @@ public class TransactionAccessDomainDataRegionGroupTest extends BaseCoreFunction
     }
 
     @Test
-    public void testCacheEvictOnCachePut_whenADomainRegionOneEntityIsEvicted_thenDomainRegionTwoWithSameIdIsEvictedTogether() {
+    public void testCacheEvictOnCachePut_whenADomainRegionOneEntityIsDeleted_thenDomainRegionTwoCacheWithSameIdIsEvicted() {
         CacheRegionStatistics regionOneStat = sessionFactory()
                 .getStatistics().getDomainDataRegionStatistics(DomainRegionOne.regionName);
         CacheRegionStatistics regionTwoStat = sessionFactory()
@@ -87,7 +87,7 @@ public class TransactionAccessDomainDataRegionGroupTest extends BaseCoreFunction
     }
 
     @Test
-    public void testCacheEvictOnCachePut_whenADomainRegionOneEntityIsUpdated() {
+    public void testCacheEvictOnCachePut_whenADomainRegionOneEntityIsUpdated_thenDomainRegionTwoCacheWithSameIdIsEvicted() {
         CacheRegionStatistics regionOneStat = sessionFactory()
                 .getStatistics().getDomainDataRegionStatistics(DomainRegionOne.regionName);
         CacheRegionStatistics regionTwoStat = sessionFactory()
