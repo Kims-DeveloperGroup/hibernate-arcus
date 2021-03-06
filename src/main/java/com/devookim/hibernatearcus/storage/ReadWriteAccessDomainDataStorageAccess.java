@@ -19,6 +19,7 @@ public class ReadWriteAccessDomainDataStorageAccess extends DomainDataHibernateA
         this.storageAccessConfig = storageAccessConfig;
         readWriteAccessLocks = CacheBuilder.newBuilder()
                 .expireAfterWrite(Duration.ofSeconds(10))
+                .maximumSize(10000)
                 .concurrencyLevel(1000)
                 .build();
     }
