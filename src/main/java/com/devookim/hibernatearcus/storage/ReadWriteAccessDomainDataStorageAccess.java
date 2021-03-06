@@ -12,7 +12,7 @@ import java.time.Duration;
 
 public class ReadWriteAccessDomainDataStorageAccess extends DomainDataHibernateArcusStorageAccess {
     private final Cache<AbstractReadWriteAccess.SoftLockImpl, Object> readWriteAccessLocks;
-    private HibernateArcusStorageConfig storageAccessConfig;
+    private final HibernateArcusStorageConfig storageAccessConfig;
 
     public ReadWriteAccessDomainDataStorageAccess(HibernateArcusClientFactory arcusClientFactory, String regionName, HibernateArcusStorageConfig storageAccessConfig, DomainDataRegionConfig regionConfig) {
         super(arcusClientFactory, regionName, storageAccessConfig, regionConfig);
