@@ -10,10 +10,12 @@ import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 @Slf4j
 public class DomainDataHibernateArcusStorageAccess extends HibernateArcusStorageAccess {
     private static final HashMap<String, DomainDataHibernateArcusStorageAccess> domainDataStorageAccesses = new HashMap<>();
+    private static final HashSet<AbstractReadWriteAccess.SoftLockImpl> locks = new HashSet<>();
     private final HibernateArcusStorageConfig storageAccessConfig;
     public final String entityClassName;
     private final boolean isEntityCachingStorage;
@@ -47,10 +49,17 @@ public class DomainDataHibernateArcusStorageAccess extends HibernateArcusStorage
     @Override
     public void putIntoCache(Object key, Object value, SharedSessionContractImplementor session) {
         if (storageAccessConfig.enableCacheEvictOnCachePut &&
-                ((accessType == AccessType.READ_WRITE && value instanceof AbstractReadWriteAccess.SoftLockImpl)) || (accessType != AccessType.READ_WRITE && contains(key))) {
+                (accessType == AccessType.READ_WRITE && value instanceof AbstractReadWriteAccess.SoftLockImpl && !locks.contains(value))
+                || (accessType != AccessType.READ_WRITE && contains(key))) {
+            if (accessType == AccessType.READ_WRITE) {
+                locks.add((AbstractReadWriteAccess.SoftLockImpl) value);
+            }
             log.debug("enableCacheEvictOnCachePut enabled. key: {}", key);
             evictData(key);
+        } else if (accessType == AccessType.READ_WRITE) {
+            locks.remove(value);
         }
+
         super.putIntoCache(key, value, session);
         if (value instanceof AbstractReadWriteAccess.SoftLockImpl) {
             log.trace("cacheLock key: {} lock: {}", generateKey(key), value);
