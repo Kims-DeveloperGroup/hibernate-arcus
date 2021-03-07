@@ -182,10 +182,11 @@ public class ReadWriteAccessDomainDataRegionGroupTest extends BaseCoreFunctional
 
     /**
      * When updates of regionOne and regionTwo are executed in a transaction, the cache items of both region entities are put.
-     * As a result, the next get operation of both will get cacheHit
+     * However the second update evicts the cache item of the first update.
+     * As a result, the next get operation of regionOne will get cacheMiss, and regionTwo will get cacheHit
      */
     @Test
-    public void testCacheEvictOnCachePut_whenDomainRegionOneEntityAndDomainRegionOneEntityAreUpdatedInTheSameTransaction_thenDomainRegionOneAndDomainRegionTwoShouldBeCacheHit() {
+    public void testCacheEvictOnCachePut_whenDomainRegionOneEntityAndDomainRegionOneEntityAreUpdatedInTheSameTransaction_thenDomainRegionOneShouldBeCacheMissAndDomainRegionTwoShouldBeCacheHit() {
         CacheRegionStatistics regionOneStat = sessionFactory()
                 .getStatistics().getDomainDataRegionStatistics(DomainRegionOne.regionName);
         CacheRegionStatistics regionTwoStat = sessionFactory()
@@ -228,6 +229,8 @@ public class ReadWriteAccessDomainDataRegionGroupTest extends BaseCoreFunctional
         s.get(DomainRegionTwo.class, id);
         s.getTransaction().commit();
         s.close();
+        assertEquals(1, regionOneStat.getHitCount());
+        assertEquals(1, regionOneStat.getMissCount());
         assertEquals(2, regionTwoStat.getHitCount());
     }
 
