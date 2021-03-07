@@ -17,6 +17,7 @@ import javax.persistence.Id;
 import java.io.Serializable;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class ReadWriteAccessDomainDataRegionGroupTest extends BaseCoreFunctionalTestCase {
 
@@ -81,8 +82,10 @@ public class ReadWriteAccessDomainDataRegionGroupTest extends BaseCoreFunctional
         s = openSession();
         s.beginTransaction();
         s.get(DomainRegionTwo.class, id);
+        DomainRegionOne domainRegionOneAfterDelete = s.get(DomainRegionOne.class, id);
         s.getTransaction().commit();
         s.close();
+        assertNull(domainRegionOneAfterDelete);
         assertEquals(1, regionTwoStat.getMissCount());
     }
 

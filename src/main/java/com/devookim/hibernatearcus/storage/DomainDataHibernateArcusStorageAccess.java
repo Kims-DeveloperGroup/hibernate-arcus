@@ -66,8 +66,10 @@ public class DomainDataHibernateArcusStorageAccess extends HibernateArcusStorage
         if (storageAccessConfig.regionGroupOnCacheEvict.contains(super.CACHE_REGION) && storageAccessConfig.enableCacheEvictOnCachePut) {
             String id = key.toString().split("#")[1];
             log.debug("regionGroupOnCacheEvict contains region: {}, id: {}", CACHE_REGION, id);
-            domainDataStorageAccesses.forEach((s, storageAccess) -> {
-                storageAccess.evictDataOnRegionGroupCacheEvict(new HibernateArcusCacheKeysFactory.EntityKey(storageAccess.entityClassName, id));
+            domainDataStorageAccesses.forEach((region, storageAccess) -> {
+                if (!region.equals(this.CACHE_REGION) || accessType != AccessType.READ_WRITE) {
+                    storageAccess.evictDataOnRegionGroupCacheEvict(new HibernateArcusCacheKeysFactory.EntityKey(storageAccess.entityClassName, id));
+                }
             });
         } else {
             super.evictData(key);
