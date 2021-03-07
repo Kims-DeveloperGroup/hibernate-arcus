@@ -20,8 +20,6 @@ import static org.junit.Assert.assertEquals;
 
 public class ReadWriteAccessDomainDataRegionGroupTest extends BaseCoreFunctionalTestCase {
 
-    private final String collectionCacheRegionName = "hibernate.CollectionCacheTest$ParentDomainData.children";
-
     @Override
     protected Class<?>[] getAnnotatedClasses() {
         return new Class[]{DomainRegionOne.class, DomainRegionTwo.class};
