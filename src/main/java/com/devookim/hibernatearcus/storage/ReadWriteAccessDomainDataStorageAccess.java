@@ -2,6 +2,7 @@ package com.devookim.hibernatearcus.storage;
 
 import com.devookim.hibernatearcus.client.HibernateArcusClientFactory;
 import com.devookim.hibernatearcus.config.HibernateArcusStorageConfig;
+import com.devookim.hibernatearcus.factory.HibernateArcusCacheKeysFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.cache.cfg.spi.DomainDataRegionConfig;
 import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
@@ -26,6 +27,21 @@ public class ReadWriteAccessDomainDataStorageAccess extends DomainDataHibernateA
             evictData(key);
         }
         super.putIntoCache(key, value, session);
+    }
+
+    @Override
+    public void evictData(Object key) {
+        if (storageAccessConfig.regionGroupOnCacheEvict.contains(super.CACHE_REGION) && storageAccessConfig.enableCacheEvictOnCachePut) {
+            String id = key.toString().split("#")[1];
+            log.debug("regionGroupOnCacheEvict contains region: {}, id: {}", CACHE_REGION, id);
+            domainDataStorageAccesses.forEach((region, storageAccess) -> {
+                if (!region.equals(this.CACHE_REGION)) {
+                    storageAccess.evictDataOnRegionGroupCacheEvict(new HibernateArcusCacheKeysFactory.EntityKey(storageAccess.entityClassName, id));
+                }
+            });
+        } else {
+            super.evictData(key);
+        }
     }
 
     private boolean isTransactionActive(SharedSessionContractImplementor session) {

@@ -14,7 +14,7 @@ import java.util.HashMap;
 
 @Slf4j
 public class DomainDataHibernateArcusStorageAccess extends HibernateArcusStorageAccess {
-    private static final HashMap<String, DomainDataHibernateArcusStorageAccess> domainDataStorageAccesses = new HashMap<>();
+    protected static final HashMap<String, DomainDataHibernateArcusStorageAccess> domainDataStorageAccesses = new HashMap<>();
 
     private final HibernateArcusStorageConfig storageAccessConfig;
     public final String entityClassName;
@@ -63,14 +63,12 @@ public class DomainDataHibernateArcusStorageAccess extends HibernateArcusStorage
 
     @Override
     public void evictData(Object key) {
-        if (storageAccessConfig.regionGroupOnCacheEvict.contains(super.CACHE_REGION) && storageAccessConfig.enableCacheEvictOnCachePut) {
+        if (storageAccessConfig.regionGroupOnCacheEvict.contains(super.CACHE_REGION)
+                && storageAccessConfig.enableCacheEvictOnCachePut) {
             String id = key.toString().split("#")[1];
             log.debug("regionGroupOnCacheEvict contains region: {}, id: {}", CACHE_REGION, id);
-            domainDataStorageAccesses.forEach((region, storageAccess) -> {
-                if (!region.equals(this.CACHE_REGION) || accessType != AccessType.READ_WRITE) {
-                    storageAccess.evictDataOnRegionGroupCacheEvict(new HibernateArcusCacheKeysFactory.EntityKey(storageAccess.entityClassName, id));
-                }
-            });
+            domainDataStorageAccesses.forEach((region, storageAccess) ->
+                    storageAccess.evictDataOnRegionGroupCacheEvict(new HibernateArcusCacheKeysFactory.EntityKey(storageAccess.entityClassName, id)));
         } else {
             super.evictData(key);
         }
