@@ -132,9 +132,11 @@ public class ReadWriteAccessDomainDataRegionGroupTest extends BaseCoreFunctional
 
         s = openSession();
         s.beginTransaction();
+        DomainRegionOne domainRegionOneAfterDelete = s.get(DomainRegionOne.class, id);
         s.get(DomainRegionTwo.class, id);
         s.getTransaction().commit();
         s.close();
+        assertNull(domainRegionOneAfterDelete);
         assertEquals(1, regionTwoStat.getHitCount());
         assertEquals(1, regionTwoStat.getMissCount());
     }
