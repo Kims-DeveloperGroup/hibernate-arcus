@@ -215,7 +215,6 @@ public class ReadWriteAccessDomainDataRegionGroupTest extends BaseCoreFunctional
         DomainRegionTwo domainRegionTwoFromCache = s.get(DomainRegionTwo.class, id);
         domainRegionTwoFromCache.value = "updated_value";
         s.update(domainRegionTwoFromCache);
-        System.out.println("Commit");
         s.flush();
         s.getTransaction().commit();
         s.close();
