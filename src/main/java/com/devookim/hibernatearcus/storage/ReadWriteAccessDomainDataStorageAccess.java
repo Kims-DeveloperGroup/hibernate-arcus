@@ -2,36 +2,51 @@ package com.devookim.hibernatearcus.storage;
 
 import com.devookim.hibernatearcus.client.HibernateArcusClientFactory;
 import com.devookim.hibernatearcus.config.HibernateArcusStorageConfig;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import com.devookim.hibernatearcus.factory.HibernateArcusCacheKeysFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.cache.cfg.spi.DomainDataRegionConfig;
 import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 
-import java.time.Duration;
-
+@Slf4j
 public class ReadWriteAccessDomainDataStorageAccess extends DomainDataHibernateArcusStorageAccess {
-    private final Cache<AbstractReadWriteAccess.SoftLockImpl, Object> readWriteAccessLocks;
     private final HibernateArcusStorageConfig storageAccessConfig;
 
     public ReadWriteAccessDomainDataStorageAccess(HibernateArcusClientFactory arcusClientFactory, String regionName, HibernateArcusStorageConfig storageAccessConfig, DomainDataRegionConfig regionConfig) {
         super(arcusClientFactory, regionName, storageAccessConfig, regionConfig);
         this.storageAccessConfig = storageAccessConfig;
-        readWriteAccessLocks = CacheBuilder.newBuilder()
-                .expireAfterWrite(Duration.ofSeconds(10))
-                .maximumSize(10000)
-                .concurrencyLevel(1000)
-                .build();
     }
 
     @Override
     public void putIntoCache(Object key, Object value, SharedSessionContractImplementor session) {
         if (storageAccessConfig.enableCacheEvictOnCachePut
                 && value instanceof AbstractReadWriteAccess.SoftLockImpl
-                && readWriteAccessLocks.getIfPresent(value) == null) {
+                && isTransactionActive(session)) {
+            log.debug("enableCacheEvictOnCachePut enabled. key: {}", key);
             evictData(key);
-            readWriteAccessLocks.put((AbstractReadWriteAccess.SoftLockImpl) value, key);
         }
         super.putIntoCache(key, value, session);
+    }
+
+    @Override
+    public void evictData(Object key) {
+        if (storageAccessConfig.enableCacheEvictOnCachePut &&
+                storageAccessConfig.regionGroupOnCacheEvict.contains(CACHE_REGION)) {
+            String id = key.toString().split("#")[1];
+            log.debug("regionGroupOnCacheEvict contains region: {}, id: {}", CACHE_REGION, id);
+            domainDataStorageAccesses.forEach((region, storageAccess) -> {
+                if (!region.equals(CACHE_REGION)) {
+                    storageAccess.evictDataOnRegionGroupCacheEvict(new HibernateArcusCacheKeysFactory.EntityKey(storageAccess.entityClassName, id));
+                }
+            });
+        } else {
+            super.evictData(key);
+        }
+    }
+
+    private boolean isTransactionActive(SharedSessionContractImplementor session) {
+        return session.getTransaction() != null
+                && session.getTransaction().getStatus().equals(TransactionStatus.ACTIVE);
     }
 }

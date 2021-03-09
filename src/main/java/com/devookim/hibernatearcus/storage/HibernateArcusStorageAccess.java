@@ -72,7 +72,7 @@ public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
         String generatedKey = generateKey(key);
         try {
             Object result = arcusClientFactory.getClientPool().get(generatedKey);
-            log.info("containKey for {} contains: {}", generatedKey, result != null);
+            log.trace("containKey for {} contains: {}", generatedKey, result != null);
             return result != null;
         } catch (Exception e) {
             log.error("fallbackEnabled: {} key: {} errorMsg: {}", arcusClientFactory.fallbackEnabled, generatedKey, e.getMessage());
