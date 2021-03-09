@@ -5,7 +5,7 @@ import com.devookim.hibernatearcus.config.HibernateArcusStorageConfig;
 import com.devookim.hibernatearcus.factory.HibernateArcusCacheKeysFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.cache.cfg.spi.DomainDataRegionConfig;
-import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
+import org.hibernate.cache.spi.access.SoftLock;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
 
@@ -21,7 +21,7 @@ public class ReadWriteAccessDomainDataStorageAccess extends DomainDataHibernateA
     @Override
     public void putIntoCache(Object key, Object value, SharedSessionContractImplementor session) {
         if (storageAccessConfig.enableCacheEvictOnCachePut
-                && value instanceof AbstractReadWriteAccess.SoftLockImpl
+                && value instanceof SoftLock
                 && isTransactionActive(session)) {
             log.debug("enableCacheEvictOnCachePut enabled. key: {}", key);
             evictData(key);
@@ -43,6 +43,14 @@ public class ReadWriteAccessDomainDataStorageAccess extends DomainDataHibernateA
         } else {
             super.evictData(key);
         }
+    }
+
+    @Override
+    public void evictDataOnRegionGroupCacheEvict(Object key) {
+        if (getFromCache(key, null) instanceof SoftLock) {
+            return;
+        }
+        super.evictDataOnRegionGroupCacheEvict(key);
     }
 
     private boolean isTransactionActive(SharedSessionContractImplementor session) {
