@@ -122,14 +122,4 @@ public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
             throw new CacheException(e);
         }
     }
-
-    @Override
-    public void release() {
-        try {
-            log.debug("release region:{}", CACHE_REGION);
-            this.arcusClientFactory = null;
-        } catch (Exception e) {
-            throw new CacheException(e);
-        }
-    }
 }
