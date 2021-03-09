@@ -47,7 +47,7 @@ public class ReadWriteAccessDomainDataStorageAccess extends DomainDataHibernateA
 
     @Override
     public void evictDataOnRegionGroupCacheEvict(Object key) {
-        if (getFromCache(key, null) instanceof SoftLock) {
+        if (getFromCache(key) instanceof SoftLock) {
             return;
         }
         super.evictDataOnRegionGroupCacheEvict(key);

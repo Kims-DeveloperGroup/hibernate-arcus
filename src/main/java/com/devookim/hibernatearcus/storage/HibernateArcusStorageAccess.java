@@ -23,6 +23,10 @@ public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
 
     @Override
     public Object getFromCache(Object key, SharedSessionContractImplementor session) {
+        return getFromCache(key);
+    }
+
+    protected Object getFromCache(Object key) {
         if (arcusClientFactory.isFallbackModeOn()) {
             log.info("Fallback is on key: {}", key);
             return null;
