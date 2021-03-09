@@ -31,11 +31,12 @@ public class ReadWriteAccessDomainDataStorageAccess extends DomainDataHibernateA
 
     @Override
     public void evictData(Object key) {
-        if (storageAccessConfig.regionGroupOnCacheEvict.contains(super.CACHE_REGION) && storageAccessConfig.enableCacheEvictOnCachePut) {
+        if (storageAccessConfig.enableCacheEvictOnCachePut &&
+                storageAccessConfig.regionGroupOnCacheEvict.contains(CACHE_REGION)) {
             String id = key.toString().split("#")[1];
             log.debug("regionGroupOnCacheEvict contains region: {}, id: {}", CACHE_REGION, id);
             domainDataStorageAccesses.forEach((region, storageAccess) -> {
-                if (!region.equals(this.CACHE_REGION)) {
+                if (!region.equals(CACHE_REGION)) {
                     storageAccess.evictDataOnRegionGroupCacheEvict(new HibernateArcusCacheKeysFactory.EntityKey(storageAccess.entityClassName, id));
                 }
             });
