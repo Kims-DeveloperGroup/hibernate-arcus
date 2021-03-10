@@ -38,7 +38,7 @@ public class TransactionAccessDomainDataRegionGroupTest extends BaseCoreFunction
         cfg.setProperty(Environment.SHOW_SQL, "true");
         cfg.setProperty(Environment.USE_SECOND_LEVEL_CACHE, "true");
         cfg.setProperty(Environment.CACHE_REGION_FACTORY, HibernateArcusRegionFactory.class.getName());
-        cfg.setProperty("hibernate.cache.arcus.regionGroupOnCacheEvict", DomainRegionOne.regionName + "," + DomainRegionTwo.regionName);
+        cfg.setProperty("hibernate.cache.arcus.evictionRegionGroupOnCacheUpdate", DomainRegionOne.regionName + "," + DomainRegionTwo.regionName);
     }
 
     @Before

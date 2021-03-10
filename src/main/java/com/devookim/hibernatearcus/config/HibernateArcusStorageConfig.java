@@ -6,10 +6,10 @@ import java.util.Map;
 
 public class HibernateArcusStorageConfig {
 
-    public final HashSet<String> cacheEvictionRegionGroupOnCacheUpdate;
+    public final HashSet<String> evictionRegionGroupOnCacheUpdate;
 
     public HibernateArcusStorageConfig(Map<String, String> properties) {
-        cacheEvictionRegionGroupOnCacheUpdate = new HashSet<>();
-        Collections.addAll(cacheEvictionRegionGroupOnCacheUpdate, properties.getOrDefault("hibernate.cache.arcus.regionGroupOnCacheEvict", "").split(","));
+        evictionRegionGroupOnCacheUpdate = new HashSet<>();
+        Collections.addAll(evictionRegionGroupOnCacheUpdate, properties.getOrDefault("hibernate.cache.arcus.evictionRegionGroupOnCacheUpdate", "").split(","));
     }
 }
