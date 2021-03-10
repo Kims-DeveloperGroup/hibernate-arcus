@@ -9,5 +9,5 @@ public class HibernateArcusProperties {
     public static final String HIBERNATE_CACHE_ARCUS_HEALTH_CHECK_INTERVAL_IN_SEC = "hibernate.cache.arcus.healthCheckIntervalInSec";
     public static final String HIBERNATE_CACHE_ARCUS_RECONNECT_INTERVAL_IN_SEC = "hibernate.cache.arcus.reconnectIntervalInSec";
     public static final String HIBERNATE_CACHE_ARCUS_OP_TIMEOUT = "hibernate.cache.arcus.opTimeout";
-    public static final String HIBERNATE_CACHE_ARCUS_EVICTION_REGION_GROUP_ON_CACHE_UPDATE = "hibernate.cache.arcus.evictionRegionGroupOnCacheUpdate";
+    public static final String HIBERNATE_CACHE_ARCUS_EVICTION_REGION_GROUP_ON_CACHE_UPDATE = "hibernate.cache.arcus.domainData.evictionRegionGroupOnCacheUpdate";
 }
