@@ -47,7 +47,7 @@ public class DomainDataHibernateArcusStorageAccess extends HibernateArcusStorage
     @Override
     public void putIntoCache(Object key, Object value, SharedSessionContractImplementor session) {
         if (accessType != AccessType.READ_WRITE
-                && storageAccessConfig.enableCacheEvictOnCachePut
+                && storageAccessConfig.evictionRegionGroupOnCacheUpdate.contains(CACHE_REGION)
                 && contains(key)) {
             log.debug("enableCacheEvictOnCachePut enabled. key: {}", key);
             evictData(key);
@@ -63,10 +63,9 @@ public class DomainDataHibernateArcusStorageAccess extends HibernateArcusStorage
 
     @Override
     public void evictData(Object key) {
-        if (storageAccessConfig.enableCacheEvictOnCachePut
-                && storageAccessConfig.regionGroupOnCacheEvict.contains(CACHE_REGION)) {
+        if (storageAccessConfig.evictionRegionGroupOnCacheUpdate.contains(CACHE_REGION)) {
             String id = key.toString().split("#")[1];
-            log.debug("regionGroupOnCacheEvict contains region: {}, id: {}", CACHE_REGION, id);
+            log.debug("evictionRegionGroupOnCacheUpdate contains region: {}, id: {}", CACHE_REGION, id);
             domainDataStorageAccesses.forEach((region, storageAccess) ->
                     storageAccess.evictDataOnRegionGroupCacheEvict(new HibernateArcusCacheKeysFactory.EntityKey(storageAccess.entityClassName, id)));
         } else {
@@ -75,8 +74,8 @@ public class DomainDataHibernateArcusStorageAccess extends HibernateArcusStorage
     }
 
     public void evictDataOnRegionGroupCacheEvict(Object key) {
-        if (storageAccessConfig.regionGroupOnCacheEvict.contains(CACHE_REGION)) {
-            log.debug("cacheEvict {} by regionGroupOnCacheEvict", key);
+        if (storageAccessConfig.evictionRegionGroupOnCacheUpdate.contains(CACHE_REGION)) {
+            log.debug("cacheEvict {} by evictionRegionGroupOnCacheUpdate", key);
             super.evictData(key);
         }
     }

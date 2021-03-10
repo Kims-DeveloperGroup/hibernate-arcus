@@ -1,5 +1,6 @@
 package hibernate;
 
+import com.devookim.hibernatearcus.config.HibernateArcusProperties;
 import com.devookim.hibernatearcus.factory.HibernateArcusRegionFactory;
 import lombok.NoArgsConstructor;
 import org.hibernate.Session;
@@ -36,8 +37,7 @@ public class ReadWriteAccessDomainDataRegionGroupTest extends BaseCoreFunctional
         cfg.setProperty(Environment.SHOW_SQL, "true");
         cfg.setProperty(Environment.USE_SECOND_LEVEL_CACHE, "true");
         cfg.setProperty(Environment.CACHE_REGION_FACTORY, HibernateArcusRegionFactory.class.getName());
-        cfg.setProperty("hibernate.cache.arcus.enableCacheEvictOnCachePut", "true");
-        cfg.setProperty("hibernate.cache.arcus.regionGroupOnCacheEvict", DomainRegionOne.regionName + "," + DomainRegionTwo.regionName);
+        cfg.setProperty(HibernateArcusProperties.HIBERNATE_CACHE_ARCUS_EVICTION_REGION_GROUP_ON_CACHE_UPDATE, DomainRegionOne.regionName + "," + DomainRegionTwo.regionName);
     }
 
     @Before
@@ -89,12 +89,8 @@ public class ReadWriteAccessDomainDataRegionGroupTest extends BaseCoreFunctional
         assertEquals(1, regionTwoStat.getMissCount());
     }
 
-    /**
-     * When update of regionOneEntity and delete of the regionTwo are executed in a transaction, delete is called after update and the cache item that the update put is evicted.
-     * As a result, the next get operation of the updated entity will get cacheMiss
-     */
     @Test
-    public void testCacheEvictOnCachePut_whenDomainRegionOneEntityIsDeletedAndDomainRegionTwoIsUpdatedInTheSameTransaction_thenDomainRegionTwoShouldBeCacheMiss() {
+    public void testCacheEvictOnCachePut_whenDomainRegionOneEntityIsDeletedAndDomainRegionTwoIsUpdatedInTheSameTransaction_thenDomainRegionTwoShouldBeCacheHit() {
         CacheRegionStatistics regionOneStat = sessionFactory()
                 .getStatistics().getDomainDataRegionStatistics(DomainRegionOne.regionName);
         CacheRegionStatistics regionTwoStat = sessionFactory()
@@ -112,7 +108,6 @@ public class ReadWriteAccessDomainDataRegionGroupTest extends BaseCoreFunctional
         System.out.println("============================");
 
         assertEquals(1, regionOneStat.getPutCount());
-        assertEquals(0, regionOneStat.getHitCount());
         assertEquals(1, regionTwoStat.getPutCount());
 
         s = openSession();
@@ -128,7 +123,6 @@ public class ReadWriteAccessDomainDataRegionGroupTest extends BaseCoreFunctional
         System.out.println("============================");
 
         assertEquals(1, regionTwoStat.getHitCount());
-        assertEquals(0, regionTwoStat.getMissCount());
 
         s = openSession();
         s.beginTransaction();
@@ -137,8 +131,7 @@ public class ReadWriteAccessDomainDataRegionGroupTest extends BaseCoreFunctional
         s.getTransaction().commit();
         s.close();
         assertNull(domainRegionOneAfterDelete);
-        assertEquals(1, regionTwoStat.getHitCount());
-        assertEquals(1, regionTwoStat.getMissCount());
+        assertEquals(2, regionTwoStat.getHitCount());
     }
 
     @Test
@@ -183,13 +176,8 @@ public class ReadWriteAccessDomainDataRegionGroupTest extends BaseCoreFunctional
         assertEquals(1, regionTwoStat.getMissCount());
     }
 
-    /**
-     * When updates of regionOne and regionTwo are executed in a transaction, the cache items of both region entities are put.
-     * However the second update evicts the cache item of the first update.
-     * As a result, the next get operation of regionOne will get cacheMiss, and regionTwo will get cacheHit
-     */
     @Test
-    public void testCacheEvictOnCachePut_whenDomainRegionOneEntityAndDomainRegionOneEntityAreUpdatedInTheSameTransaction_thenDomainRegionOneShouldBeCacheMissAndDomainRegionTwoShouldBeCacheHit() {
+    public void testCacheEvictOnCachePut_whenDomainRegionOneEntityAndDomainRegionOneEntityAreUpdatedInTheSameTransaction_thenBothShouldBeCacheHit() {
         CacheRegionStatistics regionOneStat = sessionFactory()
                 .getStatistics().getDomainDataRegionStatistics(DomainRegionOne.regionName);
         CacheRegionStatistics regionTwoStat = sessionFactory()
@@ -231,8 +219,7 @@ public class ReadWriteAccessDomainDataRegionGroupTest extends BaseCoreFunctional
         s.get(DomainRegionTwo.class, id);
         s.getTransaction().commit();
         s.close();
-        assertEquals(1, regionOneStat.getHitCount());
-        assertEquals(1, regionOneStat.getMissCount());
+        assertEquals(2, regionOneStat.getHitCount());
         assertEquals(2, regionTwoStat.getHitCount());
     }
 

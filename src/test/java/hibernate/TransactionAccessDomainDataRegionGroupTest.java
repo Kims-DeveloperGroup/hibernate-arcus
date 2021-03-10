@@ -1,5 +1,6 @@
 package hibernate;
 
+import com.devookim.hibernatearcus.config.HibernateArcusProperties;
 import com.devookim.hibernatearcus.factory.HibernateArcusRegionFactory;
 import lombok.NoArgsConstructor;
 import org.hibernate.Session;
@@ -38,8 +39,7 @@ public class TransactionAccessDomainDataRegionGroupTest extends BaseCoreFunction
         cfg.setProperty(Environment.SHOW_SQL, "true");
         cfg.setProperty(Environment.USE_SECOND_LEVEL_CACHE, "true");
         cfg.setProperty(Environment.CACHE_REGION_FACTORY, HibernateArcusRegionFactory.class.getName());
-        cfg.setProperty("hibernate.cache.arcus.enableCacheEvictOnCachePut", "true");
-        cfg.setProperty("hibernate.cache.arcus.regionGroupOnCacheEvict", DomainRegionOne.regionName + "," + DomainRegionTwo.regionName);
+        cfg.setProperty(HibernateArcusProperties.HIBERNATE_CACHE_ARCUS_EVICTION_REGION_GROUP_ON_CACHE_UPDATE, DomainRegionOne.regionName + "," + DomainRegionTwo.regionName);
     }
 
     @Before

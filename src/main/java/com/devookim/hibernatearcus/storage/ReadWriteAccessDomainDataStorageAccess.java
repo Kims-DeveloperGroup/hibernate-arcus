@@ -5,7 +5,7 @@ import com.devookim.hibernatearcus.config.HibernateArcusStorageConfig;
 import com.devookim.hibernatearcus.factory.HibernateArcusCacheKeysFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.cache.cfg.spi.DomainDataRegionConfig;
-import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
+import org.hibernate.cache.spi.access.SoftLock;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
 
@@ -20,8 +20,8 @@ public class ReadWriteAccessDomainDataStorageAccess extends DomainDataHibernateA
 
     @Override
     public void putIntoCache(Object key, Object value, SharedSessionContractImplementor session) {
-        if (storageAccessConfig.enableCacheEvictOnCachePut
-                && value instanceof AbstractReadWriteAccess.SoftLockImpl
+        if (storageAccessConfig.evictionRegionGroupOnCacheUpdate.contains(CACHE_REGION)
+                && value instanceof SoftLock
                 && isTransactionActive(session)) {
             log.debug("enableCacheEvictOnCachePut enabled. key: {}", key);
             evictData(key);
@@ -31,10 +31,9 @@ public class ReadWriteAccessDomainDataStorageAccess extends DomainDataHibernateA
 
     @Override
     public void evictData(Object key) {
-        if (storageAccessConfig.enableCacheEvictOnCachePut &&
-                storageAccessConfig.regionGroupOnCacheEvict.contains(CACHE_REGION)) {
+        if (storageAccessConfig.evictionRegionGroupOnCacheUpdate.contains(CACHE_REGION)) {
             String id = key.toString().split("#")[1];
-            log.debug("regionGroupOnCacheEvict contains region: {}, id: {}", CACHE_REGION, id);
+            log.debug("evictionRegionGroupOnCacheUpdate contains region: {}, id: {}", CACHE_REGION, id);
             domainDataStorageAccesses.forEach((region, storageAccess) -> {
                 if (!region.equals(CACHE_REGION)) {
                     storageAccess.evictDataOnRegionGroupCacheEvict(new HibernateArcusCacheKeysFactory.EntityKey(storageAccess.entityClassName, id));
@@ -43,6 +42,14 @@ public class ReadWriteAccessDomainDataStorageAccess extends DomainDataHibernateA
         } else {
             super.evictData(key);
         }
+    }
+
+    @Override
+    public void evictDataOnRegionGroupCacheEvict(Object key) {
+        if (getFromCache(key) instanceof SoftLock) {
+            return;
+        }
+        super.evictDataOnRegionGroupCacheEvict(key);
     }
 
     private boolean isTransactionActive(SharedSessionContractImplementor session) {
