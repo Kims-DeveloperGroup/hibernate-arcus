@@ -36,7 +36,6 @@ public class ReadWriteAccessDomainDataRegionGroupTest extends BaseCoreFunctional
         cfg.setProperty(Environment.SHOW_SQL, "true");
         cfg.setProperty(Environment.USE_SECOND_LEVEL_CACHE, "true");
         cfg.setProperty(Environment.CACHE_REGION_FACTORY, HibernateArcusRegionFactory.class.getName());
-        cfg.setProperty("hibernate.cache.arcus.enableCacheEvictOnCachePut", "true");
         cfg.setProperty("hibernate.cache.arcus.regionGroupOnCacheEvict", DomainRegionOne.regionName + "," + DomainRegionTwo.regionName);
     }
 

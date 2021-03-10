@@ -20,7 +20,7 @@ public class ReadWriteAccessDomainDataStorageAccess extends DomainDataHibernateA
 
     @Override
     public void putIntoCache(Object key, Object value, SharedSessionContractImplementor session) {
-        if (storageAccessConfig.enableCacheEvictOnCachePut
+        if (storageAccessConfig.cacheEvictionRegionGroupOnCacheUpdate.contains(CACHE_REGION)
                 && value instanceof SoftLock
                 && isTransactionActive(session)) {
             log.debug("enableCacheEvictOnCachePut enabled. key: {}", key);
@@ -31,8 +31,7 @@ public class ReadWriteAccessDomainDataStorageAccess extends DomainDataHibernateA
 
     @Override
     public void evictData(Object key) {
-        if (storageAccessConfig.enableCacheEvictOnCachePut &&
-                storageAccessConfig.regionGroupOnCacheEvict.contains(CACHE_REGION)) {
+        if (storageAccessConfig.cacheEvictionRegionGroupOnCacheUpdate.contains(CACHE_REGION)) {
             String id = key.toString().split("#")[1];
             log.debug("regionGroupOnCacheEvict contains region: {}, id: {}", CACHE_REGION, id);
             domainDataStorageAccesses.forEach((region, storageAccess) -> {
