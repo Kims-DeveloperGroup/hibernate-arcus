@@ -10,6 +10,6 @@ public class HibernateArcusStorageConfig {
 
     public HibernateArcusStorageConfig(Map<String, String> properties) {
         evictionRegionGroupOnCacheUpdate = new HashSet<>();
-        Collections.addAll(evictionRegionGroupOnCacheUpdate, properties.getOrDefault("hibernate.cache.arcus.evictionRegionGroupOnCacheUpdate", "").split(","));
+        Collections.addAll(evictionRegionGroupOnCacheUpdate, properties.getOrDefault(HibernateArcusProperties.HIBERNATE_CACHE_ARCUS_EVICTION_REGION_GROUP_ON_CACHE_UPDATE, "").split(","));
     }
 }
