@@ -102,13 +102,14 @@ gradlew clean test --info
 ```
 ---
 
-### Configuratio Properties
+### Additional Configuration Properties
 ```
 hibernate.cache.arcus.fallbackEnabled  (default: true) // whether to use fallback mode or not.
 hibernate.cache.arcus.initFallbackMode (default: false) // Initial value of fallback mode
 hibernate.cache.arcus.reconnectIntervalInSec (default: 10000) unit mills // ArcusClient retry connection interval in seconds
 hibernate.cache.arcus.opTimeout (default 10000) unit mills // arcus client cache operation timeout.
 hibernate.cache.arcus.healthCheckIntervalInSec(default 10) unit sec // interval time of health check
+hibernate.cache.arcus.domainData.evictionRegionGroupOnCacheUpdate(default "") // domain data region group to be evicted on cache update
 ```
 
 ### Contribution
