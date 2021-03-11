@@ -11,12 +11,12 @@ _Hibernate second cache interface puts the result entities into a provided cache
 ### Quick Tutorial
 
 #### 1. Add the hibernate-arcus
-Available in [MavenCentral](https://search.maven.org/artifact/com.github.kims-developergroup/hibernate-arcus/1.1.0-RELEASE/jar)
+Available in [MavenCentral](https://search.maven.org/artifact/com.github.kims-developergroup/hibernate-arcus/1.2.0-RELEASE/jar)
 ```
 <dependency>
   <groupId>com.github.kims-developergroup</groupId>
   <artifactId>hibernate-arcus</artifactId>
-  <version>1.1.0-RELEASE</version>
+  <version>1.2.0-RELEASE</version>
 </dependency>
 ```
 <br>
