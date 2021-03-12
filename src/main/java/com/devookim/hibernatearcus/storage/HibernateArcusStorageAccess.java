@@ -8,13 +8,19 @@ import org.slf4j.Logger;
 
 public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(HibernateArcusStorageAccess.class);
-    private HibernateArcusClientFactory arcusClientFactory;
+    private final HibernateArcusClientFactory arcusClientFactory;
     protected final String CACHE_REGION;
+    private int ttl = 0;
 
     public HibernateArcusStorageAccess(HibernateArcusClientFactory arcusClientFactory, String prefix) {
         super();
         this.arcusClientFactory = arcusClientFactory;
         this.CACHE_REGION = prefix;
+    }
+
+    public HibernateArcusStorageAccess(HibernateArcusClientFactory arcusClientFactory, String prefix, int ttl) {
+        this(arcusClientFactory, prefix);
+        this.ttl = ttl;
     }
 
     protected String generateKey(Object key) {
@@ -55,7 +61,7 @@ public class HibernateArcusStorageAccess implements DomainDataStorageAccess {
 
         String generatedKey = generateKey(key);
         try {
-            arcusClientFactory.getClientPool().set(generatedKey, 0, value).get();
+            arcusClientFactory.getClientPool().set(generatedKey, ttl, value).get();
             log.trace("put key:{} value: {}", generatedKey, value);
         } catch (Exception e) {
             log.error("fallbackEnabled: {} key: {} errorMsg: {}", arcusClientFactory.fallbackEnabled, generatedKey, e.getMessage());

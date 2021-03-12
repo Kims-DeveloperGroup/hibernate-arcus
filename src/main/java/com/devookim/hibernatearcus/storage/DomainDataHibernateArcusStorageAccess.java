@@ -24,7 +24,7 @@ public class DomainDataHibernateArcusStorageAccess extends HibernateArcusStorage
                                                  String regionName,
                                                  HibernateArcusStorageConfig storageAccessConfig,
                                                  DomainDataRegionConfig regionConfig) {
-        super(arcusClientFactory, regionName);
+        super(arcusClientFactory, regionName, storageAccessConfig.domainDataTTL);
         this.storageAccessConfig = storageAccessConfig;
         this.entityClassName = RegionConfigUtil.getEntityClassName(regionConfig);
         this.accessType = RegionConfigUtil.getAccessTypeOfEntityCaching(regionConfig);
