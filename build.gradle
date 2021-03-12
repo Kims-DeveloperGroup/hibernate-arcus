@@ -6,7 +6,7 @@ plugins {
 
 group='com.github.kims-developergroup'
 archivesBaseName='hibernate-arcus'
-version='1.2.0-RELEASE'
+version='1.2.1-SNAPSHOT'
 
 repositories {
     mavenCentral()
