@@ -19,6 +19,7 @@ Available in [MavenCentral](https://search.maven.org/artifact/com.github.kims-de
   <version>1.2.0-RELEASE</version>
 </dependency>
 ```
+Snapshot maven repository: https://oss.sonatype.org/content/repositories/snapshots/
 <br>
 <br>
 
