@@ -2,7 +2,10 @@ package hibernate.domain;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.NaturalIdCache;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -18,7 +21,6 @@ import javax.persistence.NamedQuery;
 @NaturalIdCache
 @Data
 @NoArgsConstructor
-@DynamicUpdate
 public class ReadWriteAccessDomainData {
     public static final String CACHE_REGION_NAME = "DomainData";
     public static final String NATURAL_ID_CACHE_REGION_NAME = CACHE_REGION_NAME + "__NaturalId";
