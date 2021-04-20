@@ -28,8 +28,6 @@ public class ReadWriteAccessDomainData {
 
     private String name;
 
-    public int value = 0;
-
     @NaturalId
     private long naturalId;
 
