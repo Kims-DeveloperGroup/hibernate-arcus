@@ -3,7 +3,6 @@ package hibernate;
 import com.devookim.hibernatearcus.factory.HibernateArcusRegionFactory;
 import hibernate.domain.ReadWriteAccessDomainData;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
@@ -15,12 +14,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
@@ -28,7 +21,7 @@ public class ReadWriteAccessDomainDataCacheTest extends BaseCoreFunctionalTestCa
 
     @Override
     protected Class<?>[] getAnnotatedClasses() {
-        return new Class[] { ReadWriteAccessDomainData.class};
+        return new Class[]{ReadWriteAccessDomainData.class};
     }
 
     @Override
@@ -241,106 +234,6 @@ public class ReadWriteAccessDomainDataCacheTest extends BaseCoreFunctionalTestCa
     }
 
     @Test
-    public void test_whenMultipleTransactionUpdatesAtTheSameTime_thenCacheItemAndDbEntityAreIdentical() {
-        Statistics stats = sessionFactory().getStatistics();
-        Long id = null;
-
-        // 데이터를 인서트하고 캐쉬에 넣는다
-        Session s = openSession();
-        s.beginTransaction();
-        ReadWriteAccessDomainData readWriteAccessDomainData = new ReadWriteAccessDomainData(System.currentTimeMillis(), "0");
-        id = (Long) s.save(readWriteAccessDomainData);
-        s.flush();
-        s.getTransaction().commit();
-        s.close();
-
-        int parallel = 20;
-        // 이름과 값을 다른 트랜잭션 에서 동시에 실행한다
-        try {
-            updateNameAndValue(id, parallel);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println();
-
-        //캐쉬에서 데이터를 가져온다
-        s = openSession();
-        s.beginTransaction();
-        ReadWriteAccessDomainData fromCache = s.get(ReadWriteAccessDomainData.class, id);
-        s.getTransaction().commit();
-        s.close();
-
-
-        //디비에서 데이터를 가져온다.
-        s = openSession();
-        s.beginTransaction();
-        Query query = s.getNamedQuery("domainDataNamedQueryById");
-        query.setParameter("id", id);
-        log.info("fromDB");
-        ReadWriteAccessDomainData fromDB = (ReadWriteAccessDomainData) query.uniqueResult();
-        log.info("fromDB");
-        s.getTransaction().commit();
-        s.close();
-
-        // 캐쉬에서
-        // value 0 -> 1 확인한다
-        // 이름이   updated로 바뀌었는지 확인하다
-        assertThat(fromCache.value).isEqualTo(1);
-        assertThat(fromCache.getName()).isEqualTo("updated");
-
-        // 디비랑 캐쉬랑 값이 같은지 확인한다
-        assertThat(fromCache.value).isEqualTo(fromDB.getValue());
-        assertThat(fromCache.getName()).isEqualTo(fromDB.getName());
-    }
-
-    private void updateNameAndValue(Long id, int parallel) throws InterruptedException {
-        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(parallel);
-
-        Callable<ReadWriteAccessDomainData> incrementDataValue = () -> {
-            Session s;
-            ReadWriteAccessDomainData data;
-            s = openSession();
-            s.beginTransaction();
-            data = s.get(ReadWriteAccessDomainData.class, id);
-            log.info("===1 name: {} value: {}", data.getName(), data.value);
-            data.value += 1;
-            s.flush();
-            s.getTransaction().commit();
-            s.clear();
-            s.close();
-            return data;
-        };
-
-        Callable<ReadWriteAccessDomainData> setName = () -> {
-            Session s;
-            ReadWriteAccessDomainData data;
-            s = openSession();
-            s.beginTransaction();
-            data = s.get(ReadWriteAccessDomainData.class, id);
-            log.info("===2 name: {} value: {}", data.getName(), data.value);
-            data.setName("updated");
-            s.flush();
-            s.getTransaction().commit();
-            s.clear();
-            s.close();
-            return data;
-        };
-
-        List<Callable<ReadWriteAccessDomainData>> callables = new ArrayList<>(parallel);
-
-        for (int i = 0; i < parallel / 2; i++) {
-            callables.add(incrementDataValue);
-        }
-
-        for (int i = 0; i < parallel / 2; i++) {
-            callables.add(setName);
-        }
-
-        scheduledExecutorService.invokeAll(callables);
-        Thread.sleep(1000L);
-    }
-
-    @Test
     public void testDelete_whenDeleteIsCommitted_thenCacheShouldBeMiss() {
         Statistics stats = sessionFactory().getStatistics();
         Long id = null;
@@ -353,7 +246,6 @@ public class ReadWriteAccessDomainDataCacheTest extends BaseCoreFunctionalTestCa
         s.close();
         Assert.assertEquals(0, stats.getDomainDataRegionStatistics(ReadWriteAccessDomainData.CACHE_REGION_NAME).getHitCount());
         Assert.assertEquals(1, stats.getDomainDataRegionStatistics(ReadWriteAccessDomainData.CACHE_REGION_NAME).getPutCount());
-        //save 할때 entity를 가져오는 과정에서 cacheMiss로 로그가 찍히는데 stats에서는 miss로 인식되지 않음
 
         s = openSession();
         s.beginTransaction();
