@@ -70,15 +70,27 @@ public class PAccountCacheTest extends BaseCoreFunctionalTestCase {
         //3) 업데이트 후 실제 데이터를 DB에서 가져온다
         s = openSession();
         s.beginTransaction();
-        PAccount result = s.get(PAccount.class, pAccountId);
+        PAccount resultFromDB = s.get(PAccount.class, pAccountId);
         s.getTransaction().commit();
         s.close();
 
         //4) 결과 값과 업데이트 값과 비교해본다
-        assertThat(result.getLastAccessAt()).isEqualTo(lastAccessAtToUpdate);
-        assertThat(result.getStatus()).isEqualTo(statusToUpdate);
+        assertThat(resultFromDB.getLastAccessAt()).isEqualTo(lastAccessAtToUpdate);
+        assertThat(resultFromDB.getStatus()).isEqualTo(statusToUpdate);
         assertThat(stats.getDomainDataRegionStatistics(PAccount.CACHE_REGION_NAME).getPutCount()).isEqualTo(2);
 
+        // 추가
+        //5) 데이터를 Cache에서 가져온다
+        s = openSession();
+        s.beginTransaction();
+        PAccount resultFromCache = s.get(PAccount.class, pAccountId);
+        s.getTransaction().commit();
+        s.close();
+
+        //6) 결과 값과 업데이트 값과 비교해본다
+        assertThat(resultFromCache.getLastAccessAt()).isEqualTo(lastAccessAtToUpdate);
+        assertThat(resultFromCache.getStatus()).isEqualTo(statusToUpdate);
+        assertThat(stats.getDomainDataRegionStatistics(PAccount.CACHE_REGION_NAME).getHitCount()).isEqualTo(3);
     }
 
     private void updateStatusAndLastAccessAtInDistinctTransactions(Long id, int lastAccessAt, String status) throws InterruptedException {
