@@ -21,7 +21,7 @@ public class ReadWriteAccessDomainDataCacheTest extends BaseCoreFunctionalTestCa
 
     @Override
     protected Class<?>[] getAnnotatedClasses() {
-        return new Class[] { ReadWriteAccessDomainData.class};
+        return new Class[]{ReadWriteAccessDomainData.class};
     }
 
     @Override
@@ -32,7 +32,8 @@ public class ReadWriteAccessDomainDataCacheTest extends BaseCoreFunctionalTestCa
         cfg.setProperty(Environment.URL, "jdbc:h2:mem:db1;DB_CLOSE_DELAY=-1;");
         cfg.setProperty(Environment.GENERATE_STATISTICS, "true");
         cfg.setProperty(Environment.USE_SECOND_LEVEL_CACHE, "true");
-        cfg.setProperty(Environment.USE_QUERY_CACHE, "true");
+        cfg.setProperty(Environment.USE_QUERY_CACHE, "false");
+        cfg.setProperty(Environment.SHOW_SQL, "true");
         cfg.setProperty(Environment.CACHE_REGION_FACTORY, HibernateArcusRegionFactory.class.getName());
     }
 
@@ -245,7 +246,6 @@ public class ReadWriteAccessDomainDataCacheTest extends BaseCoreFunctionalTestCa
         s.close();
         Assert.assertEquals(0, stats.getDomainDataRegionStatistics(ReadWriteAccessDomainData.CACHE_REGION_NAME).getHitCount());
         Assert.assertEquals(1, stats.getDomainDataRegionStatistics(ReadWriteAccessDomainData.CACHE_REGION_NAME).getPutCount());
-        //save 할때 entity를 가져오는 과정에서 cacheMiss로 로그가 찍히는데 stats에서는 miss로 인식되지 않음
 
         s = openSession();
         s.beginTransaction();

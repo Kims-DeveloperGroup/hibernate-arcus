@@ -7,10 +7,16 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.NaturalIdCache;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 
 @Entity
-@NamedQueries(@NamedQuery(name = "domainDataNamedQuery", query = "from ReadWriteAccessDomainData where name = :name"))
+@NamedQueries(
+        {@NamedQuery(name = "domainDataNamedQuery", query = "from ReadWriteAccessDomainData where name = :name"),
+                @NamedQuery(name = "domainDataNamedQueryById", query = "from ReadWriteAccessDomainData where id = :id")}
+)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = ReadWriteAccessDomainData.CACHE_REGION_NAME)
 @NaturalIdCache
 @Data
@@ -23,7 +29,7 @@ public class ReadWriteAccessDomainData {
     private Long id;
 
     private String name;
-    
+
     @NaturalId
     private long naturalId;
 
