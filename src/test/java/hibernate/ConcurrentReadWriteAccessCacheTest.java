@@ -73,6 +73,7 @@ public class ConcurrentReadWriteAccessCacheTest extends BaseCoreFunctionalTestCa
         PAccount resultFromDB = s.get(PAccount.class, pAccountId);
         s.getTransaction().commit();
         s.close();
+        assertThat(stats.getDomainDataRegionStatistics(PAccount.CACHE_REGION_NAME).getHitCount()).isEqualTo(2);
 
         //4) 결과 값과 업데이트 값과 비교해본다
         assertThat(resultFromDB.getLastAccessAt()).isEqualTo(lastAccessAtToUpdate);
