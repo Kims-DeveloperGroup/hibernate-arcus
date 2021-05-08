@@ -21,7 +21,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
-public class PAccountCacheTest extends BaseCoreFunctionalTestCase {
+public class ConcurrentReadWriteAccessCacheTest extends BaseCoreFunctionalTestCase {
 
     @Override
     protected Class<?>[] getAnnotatedClasses() {
