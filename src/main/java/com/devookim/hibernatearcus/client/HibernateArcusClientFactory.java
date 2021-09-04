@@ -56,8 +56,14 @@ public class HibernateArcusClientFactory {
         }
         scheduledExecutorService.scheduleWithFixedDelay(() -> {
             log.trace("ping...");
-            Map<SocketAddress, Map<String, String>> stats = clientPool.getStats();
-            if(stats.size() == 0) {
+            Map<SocketAddress, Map<String, String>> stats = null;
+            try {
+                stats = clientPool.getStats();
+            } catch (Exception e) {
+                log.error("Error occured in arcus health check", e);
+            }
+
+            if (stats == null || stats.isEmpty()) {
                 setFallbackMode(true);
                 return;
             }
