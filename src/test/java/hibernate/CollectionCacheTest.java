@@ -24,7 +24,7 @@ public class CollectionCacheTest extends BaseCoreFunctionalTestCase {
     private final String collectionCacheRegionName = "hibernate.CollectionCacheTest$ParentDomainData.children";
 
     @Entity
-    @Cache(usage = CacheConcurrencyStrategy.READ_ONLY, region = "ParentDomainData")
+    @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL, region = "ParentDomainData")
     public static class ParentDomainData implements Serializable {
       @Id
       @Column(name = "PARENT_ID")
@@ -33,14 +33,17 @@ public class CollectionCacheTest extends BaseCoreFunctionalTestCase {
       @Column(name = "UNIQUE_FIELD", unique = true)
       String uniqueField;
 
-      @ManyToMany
+      @Column(name = "PARENT_VALUE")
+      String value = "default";
+
+      @OneToMany(cascade = CascadeType.ALL)
       @JoinTable(
           name = "PARENTDOMAINDATA_CHILDDOMAINDATA",
           joinColumns = @JoinColumn(
               name = "UNIQUE_FIELD", referencedColumnName = "UNIQUE_FIELD"),
           inverseJoinColumns = @JoinColumn(
               name = "CHILD_ID", referencedColumnName = "CHILD_ID"))
-      @Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
+      @Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
       private final List<ChildDomainData> children = new ArrayList<>();
     }
 
@@ -91,31 +94,40 @@ public class CollectionCacheTest extends BaseCoreFunctionalTestCase {
         parentDomainData.uniqueField = "1";
         ChildDomainData childDomainData = new ChildDomainData();
         childDomainData.childId = 1L;
-        s.save(childDomainData);
+        ChildDomainData childDomainData2 = new ChildDomainData();
+        childDomainData2.childId = 2L;
+//        s.save(childDomainData);
         parentDomainData.children.add(childDomainData);
+
         s.save(parentDomainData);
         s.flush();
         s.getTransaction().commit();
 
-        s = openSession();
-        s.beginTransaction();
-        ParentDomainData parentDomainData1 = s.get(ParentDomainData.class, parentDomainDataId);
-        assertThat(parentDomainData1.children).hasSize(1);
-        s.getTransaction().commit();
+//        System.out.println("=======");
+//        s = openSession();
+//        s.beginTransaction();
+//        ParentDomainData parentDomainData1 = new ParentDomainData();
+//        parentDomainData1.parentId = parentDomainDataId;
+//        parentDomainData1.value = "changed";
+//        s.save(parentDomainData1);
+////        assertThat(parentDomainData1.children).hasSize(1);
+//        s.flush();
+//        s.getTransaction().commit();
 
-        Assert.assertEquals(0, collectionTestCacheStats.getHitCount());
-        Assert.assertEquals(1, collectionTestCacheStats.getPutCount());
-
-
-        s = openSession();
-        s.beginTransaction();
-        ParentDomainData parentDomainData2 = s.get(ParentDomainData.class, parentDomainDataId);
-        assertThat(parentDomainData2.children.size()).isEqualTo(1);
-        s.getTransaction().commit();
-        s.close();
-
-        Assert.assertEquals(1, collectionTestCacheStats.getHitCount());
-        Assert.assertEquals(1, collectionTestCacheStats.getPutCount());
+//        Assert.assertEquals(0, collectionTestCacheStats.getHitCount());
+//        Assert.assertEquals(1, collectionTestCacheStats.getPutCount());
+//        System.out.println("=======");
+//
+//
+//        s = openSession();
+//        s.beginTransaction();
+//        ParentDomainData parentDomainData2 = s.get(ParentDomainData.class, parentDomainDataId);
+//        assertThat(parentDomainData2.children.size()).isEqualTo(1);
+//        s.getTransaction().commit();
+//        s.close();
+//
+//        Assert.assertEquals(1, collectionTestCacheStats.getHitCount());
+//        Assert.assertEquals(1, collectionTestCacheStats.getPutCount());
     }
 
     @Test
